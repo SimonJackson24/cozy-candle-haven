@@ -7,7 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 import { ProductGallery } from "@/components/products/ProductGallery";
 import { ProductVariantSelector } from "@/components/products/ProductVariantSelector";
 import { QuantitySelector } from "@/components/products/QuantitySelector";
-import { PricedProduct } from "@medusajs/medusa/dist/types/pricing";
+import { ProductReviews } from "@/components/products/ProductReviews";
+import { RelatedProducts } from "@/components/products/RelatedProducts";
 
 type Image = {
   url: string;
@@ -100,7 +101,7 @@ export default function ProductDetail() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="grid md:grid-cols-2 gap-8">
+      <div className="grid md:grid-cols-2 gap-8 mb-16">
         <ProductGallery images={images} title={product.title} />
         <div>
           <h1 className="text-3xl font-serif mb-4">{product.title}</h1>
@@ -129,6 +130,34 @@ export default function ProductDetail() {
           </div>
         </div>
       </div>
+
+      <div className="space-y-16">
+        <ProductReviews 
+          productId={product.id} 
+          reviews={[
+            {
+              id: "1",
+              rating: 5,
+              comment: "Great product! Exactly as described.",
+              customer_name: "John D.",
+              created_at: "2024-02-20",
+            },
+            {
+              id: "2",
+              rating: 4,
+              comment: "Good quality, fast shipping.",
+              customer_name: "Sarah M.",
+              created_at: "2024-02-19",
+            },
+          ]} 
+        />
+
+        <RelatedProducts 
+          currentProductId={product.id}
+          collectionId={product.collection?.id}
+          tags={product.tags?.map(tag => tag.value)}
+        />
+      </div>
     </div>
   );
-}
+};
