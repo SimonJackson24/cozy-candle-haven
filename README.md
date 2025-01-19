@@ -1,5 +1,17 @@
 # Welcome to your Lovable project
 
+## Quick Start
+
+1. Make the install script executable:
+```bash
+chmod +x install.sh
+```
+
+2. Run the installation script:
+```bash
+./install.sh
+```
+
 ## Project info
 
 **URL**: https://lovable.dev/projects/7602ddcd-ea85-48db-9d8f-cd1989a8d238
