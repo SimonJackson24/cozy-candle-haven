@@ -1,8 +1,8 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PricedVariant } from "@medusajs/medusa/dist/types/pricing/pricing-types";
+import { ProductVariant } from "@medusajs/medusa";
 
 interface ProductVariantSelectorProps {
-  variants: PricedVariant[];
+  variants: ProductVariant[];
   selectedVariant: string;
   onVariantChange: (value: string) => void;
 }

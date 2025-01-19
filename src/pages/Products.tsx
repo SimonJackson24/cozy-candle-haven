@@ -9,7 +9,7 @@ import { ProductFilters } from "@/components/products/ProductFilters";
 import { ProductGrid } from "@/components/products/ProductGrid";
 import { ProductSort } from "@/components/products/ProductSort";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { PricedProduct } from "@medusajs/medusa/dist/types/pricing/pricing-types";
+import { Product } from "@medusajs/medusa";
 
 const Products = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -26,7 +26,7 @@ const Products = () => {
 
   console.log("Products loaded:", products?.length);
 
-  const filteredProducts = products?.filter((product: PricedProduct) => {
+  const filteredProducts = products?.filter((product: Product) => {
     const matchesSearch = product.title
       ?.toLowerCase()
       .includes(searchQuery.toLowerCase());
