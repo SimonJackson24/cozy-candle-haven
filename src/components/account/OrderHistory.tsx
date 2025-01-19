@@ -1,13 +1,26 @@
+import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/utils";
+import { medusa } from "@/lib/medusa";
 
 interface OrderHistoryProps {
-  orders: any[];
-  isLoading: boolean;
+  orders?: any[];
+  isLoading?: boolean;
 }
 
-export function OrderHistory({ orders, isLoading }: OrderHistoryProps) {
-  if (isLoading) {
+export function OrderHistory({ orders: initialOrders, isLoading: initialLoading }: OrderHistoryProps) {
+  const { data: ordersData, isLoading } = useQuery({
+    queryKey: ["customer-orders"],
+    queryFn: async () => {
+      console.log("Fetching customer orders...");
+      const response = await medusa.customers.listOrders();
+      console.log("Orders fetched:", response.orders);
+      return response.orders;
+    },
+    initialData: initialOrders,
+  });
+
+  if (isLoading || initialLoading) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-20 w-full" />
@@ -17,7 +30,7 @@ export function OrderHistory({ orders, isLoading }: OrderHistoryProps) {
     );
   }
 
-  if (orders.length === 0) {
+  if (!ordersData || ordersData.length === 0) {
     return (
       <div className="text-center py-8">
         <p className="text-muted-foreground">No orders found</p>
@@ -27,7 +40,7 @@ export function OrderHistory({ orders, isLoading }: OrderHistoryProps) {
 
   return (
     <div className="space-y-4">
-      {orders.map((order) => (
+      {ordersData.map((order: any) => (
         <div
           key={order.id}
           className="border rounded-lg p-4 hover:bg-accent transition-colors"
@@ -40,7 +53,7 @@ export function OrderHistory({ orders, isLoading }: OrderHistoryProps) {
               </p>
             </div>
             <div className="text-right">
-              <p className="font-medium">{order.total}</p>
+              <p className="font-medium">${(order.total / 100).toFixed(2)}</p>
               <p className="text-sm text-muted-foreground capitalize">
                 {order.status}
               </p>

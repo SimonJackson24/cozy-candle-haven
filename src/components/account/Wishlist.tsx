@@ -1,8 +1,22 @@
 import { useState } from "react";
 import { ProductCard } from "@/components/ProductCard";
+import { useQuery } from "@tanstack/react-query";
+import { medusa } from "@/lib/medusa";
 
 export function Wishlist() {
-  const [wishlistItems, setWishlistItems] = useState([]);
+  const { data: wishlistItems = [], isLoading } = useQuery({
+    queryKey: ["customer-wishlist"],
+    queryFn: async () => {
+      console.log("Fetching wishlist items...");
+      // Note: This is a placeholder as Medusa doesn't have built-in wishlist functionality
+      // You would need to implement this with a custom endpoint or local storage
+      return [];
+    },
+  });
+
+  if (isLoading) {
+    return <div>Loading wishlist...</div>;
+  }
 
   return (
     <div>
