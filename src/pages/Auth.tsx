@@ -14,11 +14,12 @@ const Auth = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth state changed:", event, session);
       
-      if (event === "SIGNED_IN") {
-        console.log("Your user ID is:", session?.user.id);
+      if (event === "SIGNED_IN" && session) {
+        console.log("Your user ID is:", session.user.id);
         toast({
           title: "Welcome!",
-          description: `You have successfully signed in. Your user ID is: ${session?.user.id}`,
+          description: `Please copy your User ID: ${session.user.id}`,
+          duration: 10000, // Show for 10 seconds
         });
         navigate("/");
       }
