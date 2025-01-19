@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Minus, Plus, Trash2 } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { medusa } from "@/lib/medusa";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "react-router-dom";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
+import { CartItem } from "./cart/CartItem";
+import { CartSummary } from "./cart/CartSummary";
+import { CartOptions } from "./cart/CartOptions";
 
 interface CartItem {
   id: string;
@@ -123,7 +124,6 @@ export function Cart() {
     try {
       setIsLoading(true);
       
-      // Update cart with notes and gift options
       await medusa.carts.update(cartId, {
         context: {
           order_notes: orderNotes,
@@ -150,7 +150,7 @@ export function Cart() {
     0
   );
 
-  const estimatedTax = subtotal * 0.1; // 10% tax rate
+  const estimatedTax = subtotal * 0.1;
   const total = subtotal + estimatedTax;
 
   return (
@@ -182,110 +182,38 @@ export function Cart() {
             <>
               <div className="space-y-4 max-h-[40vh] overflow-y-auto">
                 {cartItems.map((item) => (
-                  <div
+                  <CartItem
                     key={item.id}
-                    className="flex items-center gap-4 border-b border-border pb-4"
-                  >
-                    <img
-                      src={item.thumbnail || "/placeholder.svg"}
-                      alt={item.title}
-                      className="w-20 h-20 object-cover rounded"
-                    />
-                    <div className="flex-1">
-                      <h3 className="font-medium">{item.title}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {item.variant.title}
-                      </p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() =>
-                            updateItemQuantity(item.id, item.quantity - 1)
-                          }
-                          disabled={item.quantity <= 1 || isLoading}
-                        >
-                          <Minus className="h-4 w-4" />
-                        </Button>
-                        <span>{item.quantity}</span>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() =>
-                            updateItemQuantity(item.id, item.quantity + 1)
-                          }
-                          disabled={isLoading}
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium">
-                        ${((item.unit_price * item.quantity) / 100).toFixed(2)}
-                      </p>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="mt-2"
-                        onClick={() => removeItem(item.id)}
-                        disabled={isLoading}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
+                    {...item}
+                    onUpdateQuantity={updateItemQuantity}
+                    onRemove={removeItem}
+                    isLoading={isLoading}
+                  />
                 ))}
               </div>
 
-              <div className="space-y-4">
-                <Textarea
-                  placeholder="Add any notes about your order..."
-                  value={orderNotes}
-                  onChange={(e) => setOrderNotes(e.target.value)}
-                  className="w-full"
-                />
+              <CartOptions
+                orderNotes={orderNotes}
+                isGift={isGift}
+                onNotesChange={setOrderNotes}
+                onGiftChange={setIsGift}
+              />
 
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="gift"
-                    checked={isGift}
-                    onCheckedChange={(checked) => setIsGift(checked as boolean)}
-                  />
-                  <label
-                    htmlFor="gift"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    This is a gift
-                  </label>
-                </div>
+              <Separator />
 
-                <Separator />
+              <CartSummary
+                subtotal={subtotal}
+                estimatedTax={estimatedTax}
+                total={total}
+              />
 
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Subtotal</span>
-                    <span>${(subtotal / 100).toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Estimated Tax</span>
-                    <span>${(estimatedTax / 100).toFixed(2)}</span>
-                  </div>
-                  <Separator />
-                  <div className="flex justify-between font-medium">
-                    <span>Total</span>
-                    <span>${(total / 100).toFixed(2)}</span>
-                  </div>
-                </div>
-
-                <Button 
-                  className="w-full" 
-                  onClick={proceedToCheckout}
-                  disabled={isLoading || cartItems.length === 0}
-                >
-                  Proceed to Checkout
-                </Button>
-              </div>
+              <Button 
+                className="w-full" 
+                onClick={proceedToCheckout}
+                disabled={isLoading || cartItems.length === 0}
+              >
+                Proceed to Checkout
+              </Button>
             </>
           )}
         </div>
