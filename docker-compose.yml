@@ -56,6 +56,7 @@ services:
       - "8080:8080"
     environment:
       - VITE_MEDUSA_BACKEND_URL=http://medusa:9000
+      - HOST=0.0.0.0
     depends_on:
       - medusa
     networks:
@@ -67,3 +68,6 @@ volumes:
 networks:
   medusa-network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.0.0/24
