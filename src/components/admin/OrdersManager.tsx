@@ -25,9 +25,7 @@ type Order = {
   status: string;
   total_amount: number;
   user_id: string;
-  user_profile?: {
-    username: string | null;
-  };
+  username: string | null;
 };
 
 export function OrdersManager() {
@@ -47,8 +45,9 @@ export function OrdersManager() {
           status,
           total_amount,
           user_id,
-          user_profile:profiles(username)
-        `);
+          username:profiles!orders_user_id_fkey(username)
+        `)
+        .order('created_at', { ascending: false });
 
       if (selectedStatus) {
         query = query.eq("status", selectedStatus);
@@ -66,8 +65,18 @@ export function OrdersManager() {
         return [];
       }
 
-      console.log("Fetched orders:", data);
-      return data as Order[];
+      // Transform the data to match our Order type
+      const transformedOrders: Order[] = data.map(order => ({
+        id: order.id,
+        created_at: order.created_at,
+        status: order.status,
+        total_amount: order.total_amount,
+        user_id: order.user_id,
+        username: order.username?.[0]?.username || null
+      }));
+
+      console.log("Fetched and transformed orders:", transformedOrders);
+      return transformedOrders;
     },
   });
 
@@ -139,7 +148,7 @@ export function OrdersManager() {
               <TableCell>
                 {new Date(order.created_at).toLocaleDateString()}
               </TableCell>
-              <TableCell>{order.user_profile?.username || "Anonymous"}</TableCell>
+              <TableCell>{order.username || "Anonymous"}</TableCell>
               <TableCell>${order.total_amount.toFixed(2)}</TableCell>
               <TableCell>
                 <Badge
