@@ -22,7 +22,7 @@ services:
       - medusa-network
 
   medusa:
-    image: medusajs/medusa:latest
+    image: medusajs/medusa-backend:latest
     depends_on:
       - postgres
       - redis
