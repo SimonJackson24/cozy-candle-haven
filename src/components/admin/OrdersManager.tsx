@@ -39,18 +39,21 @@ export function OrdersManager() {
     queryFn: async () => {
       console.log("Fetching orders with status:", selectedStatus);
       
-      const query = supabase
+      let query = supabase
         .from("orders")
         .select(`
-          *,
-          profiles:user_id (
+          id,
+          created_at,
+          status,
+          total_amount,
+          user_id,
+          profiles (
             username
           )
-        `)
-        .order("created_at", { ascending: false });
+        `);
 
       if (selectedStatus) {
-        query.eq("status", selectedStatus);
+        query = query.eq("status", selectedStatus);
       }
 
       const { data, error } = await query;
