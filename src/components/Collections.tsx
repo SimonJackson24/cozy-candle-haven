@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getCollections } from "@/lib/medusa";
 import { Link } from "react-router-dom";
 import { Skeleton } from "./ui/skeleton";
-import { Collection } from "@medusajs/medusa";
+import type { Collection } from "@medusajs/medusa/dist/models/collection";
 
 export const Collections = () => {
   const { data: collections, isLoading, error } = useQuery<Collection[]>({

@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getCollection } from "@/lib/medusa";
 import { ProductGrid } from "@/components/products/ProductGrid";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Collection } from "@medusajs/medusa";
+import type { Collection } from "@medusajs/medusa/dist/models/collection";
 import { PricedProduct } from "@medusajs/medusa/dist/types/pricing";
 
 export default function CollectionDetail() {
