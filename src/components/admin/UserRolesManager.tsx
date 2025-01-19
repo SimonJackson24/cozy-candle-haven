@@ -11,15 +11,25 @@ import {
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
+type UserRoleWithProfile = {
+  id: string;
+  user_id: string;
+  role: 'admin' | 'user';
+  created_at: string;
+  profiles?: {
+    username: string | null;
+  } | null;
+}
+
 export const UserRolesManager = () => {
-  const { data: userRoles, isLoading } = useQuery({
+  const { data: userRoles, isLoading } = useQuery<UserRoleWithProfile[]>({
     queryKey: ['user-roles'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('user_roles')
         .select(`
           *,
-          profiles:profiles(username)
+          profiles (username)
         `)
         .order('created_at', { ascending: false });
       
