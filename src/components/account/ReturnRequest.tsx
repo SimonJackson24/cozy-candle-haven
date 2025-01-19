@@ -47,7 +47,6 @@ export function ReturnRequest({ orderId, items, onRequestSubmitted }: ReturnRequ
         })),
         return_shipping: {
           option_id: "manual",
-          price: 0,
         },
       });
       
