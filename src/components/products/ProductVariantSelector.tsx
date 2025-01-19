@@ -1,13 +1,8 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PricedVariant } from "@medusajs/medusa/dist/types/pricing/pricing-types";
 
 interface ProductVariantSelectorProps {
-  variants: Array<{
-    id: string;
-    title: string;
-    prices: Array<{
-      amount: number;
-    }>;
-  }>;
+  variants: PricedVariant[];
   selectedVariant: string;
   onVariantChange: (value: string) => void;
 }
@@ -26,8 +21,8 @@ export const ProductVariantSelector = ({
         </SelectTrigger>
         <SelectContent>
           {variants.map((variant) => (
-            <SelectItem key={variant.id} value={variant.id}>
-              {variant.title} - ${(variant.prices[0].amount / 100).toFixed(2)}
+            <SelectItem key={variant.id} value={variant.id || ""}>
+              {variant.title} - ${((variant.prices?.[0]?.amount || 0) / 100).toFixed(2)}
             </SelectItem>
           ))}
         </SelectContent>

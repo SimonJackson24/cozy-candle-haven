@@ -1,9 +1,9 @@
 import { ProductCard } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Product } from "@medusajs/medusa";
+import { PricedProduct } from "@medusajs/medusa/dist/types/pricing/pricing-types";
 
 interface ProductGridProps {
-  products: Product[] | undefined;
+  products: PricedProduct[] | undefined;
   isLoading: boolean;
 }
 
