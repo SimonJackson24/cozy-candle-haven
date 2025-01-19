@@ -28,17 +28,6 @@ type Order = {
   username: string | null;
 };
 
-type OrderResponse = {
-  id: string;
-  created_at: string;
-  status: string;
-  total_amount: number;
-  user_id: string;
-  profiles: {
-    username: string | null;
-  }[] | null;
-}
-
 export function OrdersManager() {
   const { toast } = useToast();
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
@@ -56,7 +45,9 @@ export function OrdersManager() {
           status,
           total_amount,
           user_id,
-          profiles:profiles(username)
+          user:user_id (
+            username
+          )
         `)
         .order('created_at', { ascending: false });
 
@@ -77,13 +68,13 @@ export function OrdersManager() {
       }
 
       // Transform the data to match our Order type
-      const transformedOrders: Order[] = (data as OrderResponse[]).map(order => ({
+      const transformedOrders: Order[] = (data || []).map(order => ({
         id: order.id,
         created_at: order.created_at,
         status: order.status,
         total_amount: order.total_amount,
         user_id: order.user_id,
-        username: order.profiles?.[0]?.username ?? null
+        username: order.user?.username ?? null
       }));
 
       console.log("Fetched and transformed orders:", transformedOrders);
