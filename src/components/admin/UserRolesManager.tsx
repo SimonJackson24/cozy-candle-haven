@@ -25,7 +25,7 @@ type UserRoleWithProfile = {
   user_id: string;
   role: 'admin' | 'user';
   created_at: string;
-  profiles?: {
+  profiles: {
     username: string | null;
   } | null;
 }
@@ -45,13 +45,17 @@ export const UserRolesManager = () => {
       const { data, error } = await supabase
         .from('user_roles')
         .select(`
-          *,
-          profiles (username)
-        `)
-        .order('created_at', { ascending: false });
+          id,
+          user_id,
+          role,
+          created_at,
+          profiles:user_id (
+            username
+          )
+        `);
       
       if (error) throw error;
-      return data;
+      return data as UserRoleWithProfile[];
     },
   });
 
