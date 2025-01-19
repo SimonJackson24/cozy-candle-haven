@@ -18,6 +18,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
+// Define the Image type based on Medusa's types
+type Image = {
+  url: string;
+  id?: string;
+};
+
 export default function ProductDetail() {
   const { id } = useParams();
   const { toast } = useToast();
@@ -35,17 +41,17 @@ export default function ProductDetail() {
 
   console.log("Product data:", product);
 
-  const images = product?.images || [];
+  const images: (Image | string)[] = product?.images || [];
   if (product?.thumbnail) {
     const thumbnailUrl = typeof product.thumbnail === 'string' 
       ? product.thumbnail 
-      : product.thumbnail.url;
-    if (!images.some(img => (typeof img === 'string' ? img : img.url) === thumbnailUrl)) {
+      : (product.thumbnail as Image).url;
+    if (!images.some(img => (typeof img === 'string' ? img : (img as Image).url) === thumbnailUrl)) {
       images.unshift(product.thumbnail);
     }
   }
 
-  const getImageUrl = (image: any) => {
+  const getImageUrl = (image: Image | string): string => {
     return typeof image === 'string' ? image : image.url;
   };
 
