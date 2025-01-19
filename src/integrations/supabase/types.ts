@@ -45,7 +45,7 @@ export type Database = {
           order_id?: string | null
           price_at_time: number
           product_id?: string | null
-          quantity: number
+          quantity?: number
         }
         Update: {
           created_at?: string
@@ -75,31 +75,37 @@ export type Database = {
       orders: {
         Row: {
           billing_address: Json | null
+          carrier: string | null
           created_at: string
           id: string
           shipping_address: Json | null
           status: string
           total_amount: number
+          tracking_number: string | null
           updated_at: string
           user_id: string | null
         }
         Insert: {
           billing_address?: Json | null
+          carrier?: string | null
           created_at?: string
           id?: string
           shipping_address?: Json | null
           status?: string
           total_amount?: number
+          tracking_number?: string | null
           updated_at?: string
           user_id?: string | null
         }
         Update: {
           billing_address?: Json | null
+          carrier?: string | null
           created_at?: string
           id?: string
           shipping_address?: Json | null
           status?: string
           total_amount?: number
+          tracking_number?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -128,7 +134,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_featured?: boolean | null
-          price: number
+          price?: number
           seo_description?: string | null
           seo_title?: string | null
           sku?: string | null
