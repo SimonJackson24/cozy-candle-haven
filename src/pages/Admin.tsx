@@ -21,22 +21,15 @@ const Admin = () => {
         return;
       }
 
-      const { data, error } = await supabase.rpc('is_admin', {
-        user_id: session.user.id
-      });
+      const { data: userRoles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', session.user.id)
+        .single();
 
-      if (error) {
-        console.error('Error checking admin status:', error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Could not verify admin status",
-        });
-        navigate('/');
-        return;
-      }
+      const isUserAdmin = userRoles?.role === 'admin';
 
-      if (!data) {
+      if (!isUserAdmin) {
         toast({
           variant: "destructive",
           title: "Access Denied",
@@ -46,7 +39,7 @@ const Admin = () => {
         return;
       }
 
-      setIsAdmin(data);
+      setIsAdmin(isUserAdmin);
     };
 
     checkAdminStatus();
