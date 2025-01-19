@@ -47,7 +47,7 @@ export function OrdersManager() {
           status,
           total_amount,
           user_id,
-          profiles (
+          profiles!orders_user_id_fkey (
             username
           )
         `)
