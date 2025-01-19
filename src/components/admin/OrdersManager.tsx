@@ -28,6 +28,17 @@ type Order = {
   username: string | null;
 };
 
+type OrderWithUser = {
+  id: string;
+  created_at: string;
+  status: string;
+  total_amount: number;
+  user_id: string;
+  user: {
+    username: string | null;
+  } | null;
+}
+
 export function OrdersManager() {
   const { toast } = useToast();
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
@@ -68,7 +79,7 @@ export function OrdersManager() {
       }
 
       // Transform the data to match our Order type
-      const transformedOrders: Order[] = (data || []).map(order => ({
+      const transformedOrders: Order[] = (data as OrderWithUser[]).map(order => ({
         id: order.id,
         created_at: order.created_at,
         status: order.status,
