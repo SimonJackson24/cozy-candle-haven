@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/utils";
 import { medusa } from "@/lib/medusa";
+import { Button } from "@/components/ui/button";
 
 interface OrderHistoryProps {
   orders?: any[];
@@ -9,6 +11,8 @@ interface OrderHistoryProps {
 }
 
 export function OrderHistory({ orders: initialOrders, isLoading: initialLoading }: OrderHistoryProps) {
+  const navigate = useNavigate();
+  
   const { data: ordersData, isLoading } = useQuery({
     queryKey: ["customer-orders"],
     queryFn: async () => {
@@ -59,10 +63,17 @@ export function OrderHistory({ orders: initialOrders, isLoading: initialLoading 
               </p>
             </div>
           </div>
-          <div className="mt-4">
+          <div className="mt-4 flex justify-between items-center">
             <p className="text-sm text-muted-foreground">
               {order.items?.length || 0} items
             </p>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate(`/order-confirmation?order_id=${order.id}`)}
+            >
+              View Details
+            </Button>
           </div>
         </div>
       ))}
