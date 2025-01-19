@@ -45,7 +45,7 @@ export function OrdersManager() {
           status,
           total_amount,
           user_id,
-          username:profiles!orders_user_id_fkey(username)
+          username:profiles(username)
         `)
         .order('created_at', { ascending: false });
 
@@ -72,7 +72,7 @@ export function OrdersManager() {
         status: order.status,
         total_amount: order.total_amount,
         user_id: order.user_id,
-        username: order.username?.[0] ?? null
+        username: order.username?.[0]?.username ?? null
       }));
 
       console.log("Fetched and transformed orders:", transformedOrders);
