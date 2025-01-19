@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { ShoppingCart, Minus, Plus, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { medusa } from "@/lib/medusa";
+import { Separator } from "@/components/ui/separator";
+import { useNavigate } from "react-router-dom";
 
 interface CartItem {
   id: string;
@@ -23,6 +25,7 @@ export function Cart() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const [cartId, setCartId] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const storedCartId = localStorage.getItem("cartId");
@@ -35,7 +38,9 @@ export function Cart() {
   const fetchCart = async (id: string) => {
     try {
       setIsLoading(true);
+      console.log("Fetching cart with ID:", id);
       const { cart } = await medusa.carts.retrieve(id);
+      console.log("Cart data retrieved:", cart);
       setCartItems(cart.items);
     } catch (error) {
       console.error("Error fetching cart:", error);
@@ -54,10 +59,16 @@ export function Cart() {
 
     try {
       setIsLoading(true);
+      console.log("Updating item quantity:", { itemId, quantity });
       const { cart } = await medusa.carts.lineItems.update(cartId, itemId, {
         quantity,
       });
+      console.log("Cart updated:", cart);
       setCartItems(cart.items);
+      toast({
+        title: "Cart Updated",
+        description: "Item quantity has been updated",
+      });
     } catch (error) {
       console.error("Error updating quantity:", error);
       toast({
@@ -75,8 +86,14 @@ export function Cart() {
 
     try {
       setIsLoading(true);
+      console.log("Removing item from cart:", itemId);
       const { cart } = await medusa.carts.lineItems.delete(cartId, itemId);
+      console.log("Item removed, updated cart:", cart);
       setCartItems(cart.items);
+      toast({
+        title: "Item Removed",
+        description: "Item has been removed from your cart",
+      });
     } catch (error) {
       console.error("Error removing item:", error);
       toast({
@@ -89,10 +106,40 @@ export function Cart() {
     }
   };
 
-  const total = cartItems.reduce(
+  const proceedToCheckout = async () => {
+    if (!cartId) {
+      toast({
+        title: "Error",
+        description: "No cart found",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      // Here we'll add the checkout creation logic later
+      navigate("/checkout");
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error proceeding to checkout:", error);
+      toast({
+        title: "Error",
+        description: "Failed to proceed to checkout",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const subtotal = cartItems.reduce(
     (sum, item) => sum + item.unit_price * item.quantity,
     0
   );
+
+  const estimatedTax = subtotal * 0.1; // 10% tax rate
+  const total = subtotal + estimatedTax;
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -121,67 +168,87 @@ export function Cart() {
             </div>
           ) : (
             <>
-              {cartItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center gap-4 border-b border-border pb-4"
-                >
-                  <img
-                    src={item.thumbnail || "/placeholder.svg"}
-                    alt={item.title}
-                    className="w-20 h-20 object-cover rounded"
-                  />
-                  <div className="flex-1">
-                    <h3 className="font-medium">{item.title}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {item.variant.title}
-                    </p>
-                    <div className="flex items-center gap-2 mt-2">
+              <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+                {cartItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center gap-4 border-b border-border pb-4"
+                  >
+                    <img
+                      src={item.thumbnail || "/placeholder.svg"}
+                      alt={item.title}
+                      className="w-20 h-20 object-cover rounded"
+                    />
+                    <div className="flex-1">
+                      <h3 className="font-medium">{item.title}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {item.variant.title}
+                      </p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() =>
+                            updateItemQuantity(item.id, item.quantity - 1)
+                          }
+                          disabled={item.quantity <= 1 || isLoading}
+                        >
+                          <Minus className="h-4 w-4" />
+                        </Button>
+                        <span>{item.quantity}</span>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() =>
+                            updateItemQuantity(item.id, item.quantity + 1)
+                          }
+                          disabled={isLoading}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium">
+                        ${((item.unit_price * item.quantity) / 100).toFixed(2)}
+                      </p>
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="icon"
-                        onClick={() =>
-                          updateItemQuantity(item.id, item.quantity - 1)
-                        }
-                        disabled={item.quantity <= 1 || isLoading}
-                      >
-                        <Minus className="h-4 w-4" />
-                      </Button>
-                      <span>{item.quantity}</span>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() =>
-                          updateItemQuantity(item.id, item.quantity + 1)
-                        }
+                        className="mt-2"
+                        onClick={() => removeItem(item.id)}
                         disabled={isLoading}
                       >
-                        <Plus className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-medium">
-                      ${((item.unit_price * item.quantity) / 100).toFixed(2)}
-                    </p>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="mt-2"
-                      onClick={() => removeItem(item.id)}
-                      disabled={isLoading}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                ))}
+              </div>
+              <div className="pt-4 space-y-4">
+                <Separator />
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Subtotal</span>
+                    <span>${(subtotal / 100).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Estimated Tax</span>
+                    <span>${(estimatedTax / 100).toFixed(2)}</span>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between font-medium">
+                    <span>Total</span>
+                    <span>${(total / 100).toFixed(2)}</span>
                   </div>
                 </div>
-              ))}
-              <div className="pt-4">
-                <div className="flex justify-between font-medium">
-                  <span>Total</span>
-                  <span>${(total / 100).toFixed(2)}</span>
-                </div>
-                <Button className="w-full mt-4">Proceed to Checkout</Button>
+                <Button 
+                  className="w-full" 
+                  onClick={proceedToCheckout}
+                  disabled={isLoading || cartItems.length === 0}
+                >
+                  Proceed to Checkout
+                </Button>
               </div>
             </>
           )}
