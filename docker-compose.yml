@@ -1,0 +1,61 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: medusa
+      POSTGRES_PASSWORD: medusa
+      POSTGRES_DB: medusa
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - medusa-network
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - medusa-network
+
+  medusa:
+    image: ghcr.io/medusajs/medusa-arm64:latest
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      DATABASE_URL: postgres://medusa:medusa@postgres:5432/medusa
+      REDIS_URL: redis://redis:6379
+      NODE_ENV: development
+      JWT_SECRET: your-super-secret-jwt-key
+      COOKIE_SECRET: your-super-secret-cookie-key
+      PORT: 9000
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./medusa-data:/app/medusa/data
+    networks:
+      - medusa-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - VITE_MEDUSA_BACKEND_URL=http://medusa:9000
+    depends_on:
+      - medusa
+    networks:
+      - medusa-network
+
+volumes:
+  postgres_data:
+
+networks:
+  medusa-network:
+    driver: bridge
