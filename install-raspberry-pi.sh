@@ -49,9 +49,15 @@ sudo apt-get install -y \
 sudo systemctl enable docker
 sudo systemctl start docker
 
-# Add current user to docker group
+# Add current user to docker group and apply changes immediately
+echo -e "${GREEN}Setting up Docker permissions...${NC}"
 sudo usermod -aG docker $USER
-echo -e "${YELLOW}Please log out and back in for docker group changes to take effect.${NC}"
+if ! groups $USER | grep -q docker; then
+    echo -e "${YELLOW}Docker group changes will take effect after logging out and back in.${NC}"
+    echo -e "${YELLOW}To apply changes immediately, run:${NC}"
+    echo -e "${GREEN}newgrp docker${NC}"
+    echo -e "${YELLOW}Or log out and log back in.${NC}"
+fi
 
 # Install Node.js using Node Version Manager (nvm)
 echo -e "${GREEN}Installing Node.js...${NC}"
@@ -65,23 +71,6 @@ else
     echo -e "${GREEN}nvm is already installed${NC}"
 fi
 
-# Verify installations
-echo -e "${GREEN}Verifying installations...${NC}"
-if ! command -v docker &> /dev/null; then
-    echo -e "${RED}Docker installation failed${NC}"
-    exit 1
-fi
-
-if ! command -v docker-compose &> /dev/null; then
-    echo -e "${RED}Docker Compose installation failed${NC}"
-    exit 1
-fi
-
-if ! command -v node &> /dev/null; then
-    echo -e "${RED}Node.js installation failed${NC}"
-    exit 1
-fi
-
 # Create environment file
 echo -e "${GREEN}Creating environment configuration...${NC}"
 cat > .env << EOL
@@ -91,30 +80,36 @@ PORT=8080
 VITE_MEDUSA_BACKEND_URL=http://localhost:9000
 EOL
 
-# Pull and start containers
-echo -e "${GREEN}Starting application containers...${NC}"
-docker-compose pull
-docker-compose up -d
+# Check if user is in docker group or has sudo
+if groups $USER | grep -q docker || [ $(id -u) -eq 0 ]; then
+    # Pull and start containers
+    echo -e "${GREEN}Starting application containers...${NC}"
+    docker-compose pull
+    docker-compose up -d
 
-# Wait for services to be ready
-echo -e "${GREEN}Waiting for services to start...${NC}"
-sleep 30
+    # Wait for services to be ready
+    echo -e "${GREEN}Waiting for services to start...${NC}"
+    sleep 30
 
-# Check if services are running
-if docker-compose ps | grep -q "Up"; then
-    echo -e "${GREEN}Installation successful!${NC}"
-    echo -e "${GREEN}You can access the application at:${NC}"
-    echo -e "${GREEN}Frontend: http://localhost:8080${NC}"
-    echo -e "${GREEN}Medusa Admin: http://localhost:9000/admin${NC}"
-    
-    # Get the Raspberry Pi's IP address
-    IP_ADDRESS=$(hostname -I | awk '{print $1}')
-    echo -e "${GREEN}Or using your Raspberry Pi's IP address:${NC}"
-    echo -e "${GREEN}Frontend: http://$IP_ADDRESS:8080${NC}"
-    echo -e "${GREEN}Medusa Admin: http://$IP_ADDRESS:9000/admin${NC}"
+    # Check if services are running
+    if docker-compose ps | grep -q "Up"; then
+        echo -e "${GREEN}Installation successful!${NC}"
+        echo -e "${GREEN}You can access the application at:${NC}"
+        echo -e "${GREEN}Frontend: http://localhost:8080${NC}"
+        echo -e "${GREEN}Medusa Admin: http://localhost:9000/admin${NC}"
+        
+        # Get the Raspberry Pi's IP address
+        IP_ADDRESS=$(hostname -I | awk '{print $1}')
+        echo -e "${GREEN}Or using your Raspberry Pi's IP address:${NC}"
+        echo -e "${GREEN}Frontend: http://$IP_ADDRESS:8080${NC}"
+        echo -e "${GREEN}Medusa Admin: http://$IP_ADDRESS:9000/admin${NC}"
+    else
+        echo -e "${RED}Some services failed to start. Please check the logs:${NC}"
+        echo "docker-compose logs"
+    fi
 else
-    echo -e "${RED}Some services failed to start. Please check the logs:${NC}"
-    echo "docker-compose logs"
+    echo -e "${YELLOW}Please run 'newgrp docker' or log out and log back in to apply Docker permissions,${NC}"
+    echo -e "${YELLOW}then run 'docker-compose up -d' to start the application.${NC}"
 fi
 
 # Add helpful maintenance commands
