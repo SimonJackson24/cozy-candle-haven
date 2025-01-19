@@ -25,7 +25,7 @@ type Order = {
   status: string;
   total_amount: number;
   user_id: string;
-  profiles?: {
+  profiles: {
     username: string | null;
   } | null;
 };
@@ -47,7 +47,7 @@ export function OrdersManager() {
           status,
           total_amount,
           user_id,
-          profiles:user_id (
+          profiles (
             username
           )
         `)
