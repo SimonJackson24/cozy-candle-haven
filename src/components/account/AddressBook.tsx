@@ -13,9 +13,9 @@ export function AddressBook() {
     queryKey: ["customer-addresses"],
     queryFn: async () => {
       console.log("Fetching customer addresses...");
-      const response = await medusa.customers.addresses.list();
-      console.log("Addresses fetched:", response.addresses);
-      return response.addresses;
+      const { customer } = await medusa.customers.retrieve();
+      console.log("Addresses fetched:", customer.shipping_addresses);
+      return customer.shipping_addresses;
     },
   });
 
