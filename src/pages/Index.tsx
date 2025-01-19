@@ -6,6 +6,7 @@ import { Collections } from "@/components/Collections";
 import { Sustainability } from "@/components/Sustainability";
 import { CandleCare } from "@/components/CandleCare";
 import { USPBanner } from "@/components/USPBanner";
+import { Footer } from "@/components/Footer";
 
 const Index = () => {
   return (
@@ -18,6 +19,7 @@ const Index = () => {
       <Sustainability />
       <CandleCare />
       <Testimonials />
+      <Footer />
     </main>
   );
 };
