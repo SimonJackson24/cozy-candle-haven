@@ -22,10 +22,12 @@ services:
       - medusa-network
 
   medusa:
-    image: ghcr.io/medusajs/medusa:latest
-    depends_on:
-      - postgres
-      - redis
+    image: node:18-alpine
+    working_dir: /app/medusa
+    volumes:
+      - ./medusa-data:/app/medusa
+    ports:
+      - "9000:9000"
     environment:
       DATABASE_URL: postgres://medusa:medusa@postgres:5432/medusa
       REDIS_URL: redis://redis:6379
@@ -33,10 +35,16 @@ services:
       JWT_SECRET: your-super-secret-jwt-key
       COOKIE_SECRET: your-super-secret-cookie-key
       PORT: 9000
-    ports:
-      - "9000:9000"
-    volumes:
-      - ./medusa-data:/app/medusa/data
+    command: >
+      sh -c "
+        if [ ! -f package.json ]; then
+          npx create-medusa-app@latest . --seed --db-url postgres://medusa:medusa@postgres:5432/medusa --redis-url redis://redis:6379
+        fi &&
+        npm install &&
+        npm run dev"
+    depends_on:
+      - postgres
+      - redis
     networks:
       - medusa-network
 
