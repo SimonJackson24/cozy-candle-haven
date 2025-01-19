@@ -13,7 +13,14 @@ export function Wishlist() {
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {wishlistItems.map((item: any) => (
-            <ProductCard key={item.id} product={item} />
+            <ProductCard 
+              key={item.id}
+              title={item.title}
+              price={item.price}
+              image={item.image}
+              description={item.description}
+              productId={item.id}
+            />
           ))}
         </div>
       )}

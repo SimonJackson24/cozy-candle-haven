@@ -45,8 +45,12 @@ export function CheckoutPayment({ onComplete, onBack, isLoading }: CheckoutPayme
 
       // First, complete the cart
       console.log("Completing cart...");
-      const { cart } = await medusa.carts.complete(cartId);
-      console.log("Cart completed successfully:", cart);
+      const response = await medusa.carts.complete(cartId);
+      console.log("Cart completion response:", response);
+
+      if (!response.type.includes('order')) {
+        throw new Error('Failed to complete order');
+      }
 
       // Clear the cart ID from localStorage
       localStorage.removeItem("cartId");
@@ -139,4 +143,4 @@ export function CheckoutPayment({ onComplete, onBack, isLoading }: CheckoutPayme
       </div>
     </form>
   );
-};
+}
