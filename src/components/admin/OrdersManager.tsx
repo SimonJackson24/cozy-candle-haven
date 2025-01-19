@@ -25,9 +25,9 @@ type Order = {
   status: string;
   total_amount: number;
   user_id: string;
-  profiles: {
+  user_profile?: {
     username: string | null;
-  } | null;
+  };
 };
 
 export function OrdersManager() {
@@ -47,9 +47,7 @@ export function OrdersManager() {
           status,
           total_amount,
           user_id,
-          profiles (
-            username
-          )
+          user_profile:profiles(username)
         `);
 
       if (selectedStatus) {
@@ -141,7 +139,7 @@ export function OrdersManager() {
               <TableCell>
                 {new Date(order.created_at).toLocaleDateString()}
               </TableCell>
-              <TableCell>{order.profiles?.username || "Anonymous"}</TableCell>
+              <TableCell>{order.user_profile?.username || "Anonymous"}</TableCell>
               <TableCell>${order.total_amount.toFixed(2)}</TableCell>
               <TableCell>
                 <Badge
