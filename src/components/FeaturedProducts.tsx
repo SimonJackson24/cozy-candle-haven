@@ -43,6 +43,7 @@ export const FeaturedProducts = () => {
             products?.slice(0, 4).map((product) => (
               <ProductCard
                 key={product.id}
+                productId={product.id}
                 title={product.title}
                 price={product.variants[0]?.prices[0]?.amount || 0}
                 image={product.thumbnail || "/placeholder.svg"}
