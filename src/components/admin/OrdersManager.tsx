@@ -56,7 +56,7 @@ export function OrdersManager() {
           status,
           total_amount,
           user_id,
-          profiles:profiles!orders_user_id_fkey(username)
+          profiles(username)
         `)
         .order('created_at', { ascending: false });
 
@@ -77,13 +77,13 @@ export function OrdersManager() {
       }
 
       // Transform the data to match our Order type
-      const transformedOrders: Order[] = (data as OrderWithProfile[]).map(order => ({
+      const transformedOrders: Order[] = data.map(order => ({
         id: order.id,
         created_at: order.created_at,
         status: order.status,
         total_amount: order.total_amount,
         user_id: order.user_id,
-        username: order.profiles?.username ?? null
+        username: order.profiles?.[0]?.username ?? null
       }));
 
       console.log("Fetched and transformed orders:", transformedOrders);
