@@ -74,7 +74,13 @@ export const getCollections = async () => {
 export const getCollection = async (handle: string): Promise<ProductCollection & { products: PricedProduct[] }> => {
   try {
     console.log("Fetching collection details for:", handle);
-    const { collection } = await medusa.collections.list({ handle });
+    const { collections } = await medusa.collections.list({ handle: [handle] });
+    
+    if (!collections.length) {
+      throw new Error(`Collection with handle ${handle} not found`);
+    }
+    
+    const collection = collections[0];
     const { products } = await medusa.products.list({ collection_id: [collection.id] });
     
     console.log("Collection details:", { ...collection, products });
