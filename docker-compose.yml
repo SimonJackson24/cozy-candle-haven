@@ -35,6 +35,8 @@ services:
       JWT_SECRET: your-super-secret-jwt-key
       COOKIE_SECRET: your-super-secret-cookie-key
       PORT: 9000
+      STORE_CORS: http://192.168.0.27:8080
+      ADMIN_CORS: http://192.168.0.27:9000
     command: >
       sh -c "
         if [ ! -f package.json ]; then
@@ -55,7 +57,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - VITE_MEDUSA_BACKEND_URL=http://medusa:9000
+      - VITE_MEDUSA_BACKEND_URL=http://192.168.0.27:9000
       - HOST=0.0.0.0
     depends_on:
       - medusa
@@ -70,4 +72,4 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.20.0.0/16  # Changed to a less commonly used subnet
+        - subnet: 172.20.0.0/16
