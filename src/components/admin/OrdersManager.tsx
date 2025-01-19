@@ -56,7 +56,7 @@ export function OrdersManager() {
           status,
           total_amount,
           user_id,
-          profiles(username)
+          profiles:profiles(username)
         `)
         .order('created_at', { ascending: false });
 
