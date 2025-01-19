@@ -1,4 +1,4 @@
-import { Leaf, Recycle, Drop, Shield } from "lucide-react";
+import { Leaf, Recycle, Shield, Flame } from "lucide-react";
 
 export const Sustainability = () => {
   return (
@@ -26,7 +26,7 @@ export const Sustainability = () => {
               description: "Recyclable and biodegradable packaging materials"
             },
             {
-              icon: <Drop className="w-6 h-6" />,
+              icon: <Flame className="w-6 h-6" />,
               title: "Clean Burning",
               description: "Lead-free cotton wicks for a clean, even burn"
             },
