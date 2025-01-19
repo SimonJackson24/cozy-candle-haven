@@ -15,6 +15,7 @@ import Checkout from "./pages/Checkout";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Sustainability from "./pages/Sustainability";
+import Account from "./pages/Account";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/sustainability" element={<Sustainability />} />
+          <Route path="/account" element={<Account />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

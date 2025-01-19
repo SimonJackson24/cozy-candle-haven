@@ -1,39 +1,17 @@
-import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { OrderHistory } from "@/components/account/OrderHistory";
 import { AddressBook } from "@/components/account/AddressBook";
 import { AccountSettings } from "@/components/account/AccountSettings";
 import { Wishlist } from "@/components/account/Wishlist";
-import { medusa } from "@/lib/medusa";
 
 export default function Account() {
-  const [orders, setOrders] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        console.log("Fetching customer orders...");
-        const response = await medusa.customers.listOrders();
-        console.log("Orders fetched:", response);
-        setOrders(response.orders || []);
-      } catch (error) {
-        console.error("Error fetching orders:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchOrders();
-  }, []);
-
   return (
     <div className="container mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-6">My Account</h1>
       
       <Tabs defaultValue="orders" className="space-y-4">
-        <TabsList className="grid grid-cols-4 w-full">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="orders">Orders</TabsTrigger>
           <TabsTrigger value="addresses">Addresses</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
@@ -46,7 +24,7 @@ export default function Account() {
               <CardTitle>Order History</CardTitle>
             </CardHeader>
             <CardContent>
-              <OrderHistory orders={orders} isLoading={isLoading} />
+              <OrderHistory />
             </CardContent>
           </Card>
         </TabsContent>
