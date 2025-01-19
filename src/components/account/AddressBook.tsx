@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { medusa } from "@/lib/medusa";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { AddressFormModal } from "./AddressFormModal";
 
 export function AddressBook() {
   const { toast } = useToast();
@@ -69,6 +70,10 @@ export function AddressBook() {
     },
   });
 
+  const handleAddAddress = (address: any) => {
+    addAddressMutation.mutate(address);
+  };
+
   if (isLoading) {
     return <div>Loading addresses...</div>;
   }
@@ -76,15 +81,10 @@ export function AddressBook() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button onClick={() => {
-          // TODO: Implement address form modal
-          toast({
-            title: "Coming Soon",
-            description: "Address form will be available soon.",
-          });
-        }}>
-          Add New Address
-        </Button>
+        <AddressFormModal
+          onSubmit={handleAddAddress}
+          isLoading={addAddressMutation.isPending}
+        />
       </div>
       
       {addresses.length === 0 ? (
