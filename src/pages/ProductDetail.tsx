@@ -1,12 +1,8 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getProduct, medusa } from "@/lib/medusa";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { getProduct } from "@/lib/medusa";
 import { ProductGallery } from "@/components/products/ProductGallery";
-import { ProductVariantSelector } from "@/components/products/ProductVariantSelector";
-import { QuantitySelector } from "@/components/products/QuantitySelector";
+import { ProductInfo } from "@/components/products/ProductInfo";
 import { ProductReviews } from "@/components/products/ProductReviews";
 import { RelatedProducts } from "@/components/products/RelatedProducts";
 
@@ -17,10 +13,6 @@ type Image = {
 
 export default function ProductDetail() {
   const { id } = useParams();
-  const { toast } = useToast();
-  const [selectedVariant, setSelectedVariant] = useState("");
-  const [quantity, setQuantity] = useState(1);
-  const [isAddingToCart, setIsAddingToCart] = useState(false);
 
   const { data: product, isLoading } = useQuery({
     queryKey: ["product", id],
@@ -39,47 +31,6 @@ export default function ProductDetail() {
       images.unshift(product.thumbnail);
     }
   }
-
-  const addToCart = async () => {
-    if (!selectedVariant) {
-      toast({
-        title: "Error",
-        description: "Please select a variant",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      setIsAddingToCart(true);
-      let cartId = localStorage.getItem("cartId");
-
-      if (!cartId) {
-        const { cart } = await medusa.carts.create();
-        cartId = cart.id;
-        localStorage.setItem("cartId", cart.id);
-      }
-
-      await medusa.carts.lineItems.create(cartId, {
-        variant_id: selectedVariant,
-        quantity,
-      });
-
-      toast({
-        title: "Success",
-        description: "Item added to cart",
-      });
-    } catch (error) {
-      console.error("Error adding to cart:", error);
-      toast({
-        title: "Error",
-        description: "Failed to add item to cart",
-        variant: "destructive",
-      });
-    } finally {
-      setIsAddingToCart(false);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -103,32 +54,7 @@ export default function ProductDetail() {
     <div className="container mx-auto px-4 py-8">
       <div className="grid md:grid-cols-2 gap-8 mb-16">
         <ProductGallery images={images} title={product.title} />
-        <div>
-          <h1 className="text-3xl font-serif mb-4">{product.title}</h1>
-          <p className="text-muted-foreground mb-6">{product.description}</p>
-          <div className="space-y-6">
-            <ProductVariantSelector
-              variants={product.variants}
-              selectedVariant={selectedVariant}
-              onVariantChange={setSelectedVariant}
-            />
-            <QuantitySelector
-              quantity={quantity}
-              onQuantityChange={setQuantity}
-            />
-            <Button
-              className="w-full"
-              onClick={addToCart}
-              disabled={isAddingToCart}
-            >
-              {isAddingToCart ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-              ) : (
-                "Add to Cart"
-              )}
-            </Button>
-          </div>
-        </div>
+        <ProductInfo product={product} />
       </div>
 
       <div className="space-y-16">
@@ -160,4 +86,4 @@ export default function ProductDetail() {
       </div>
     </div>
   );
-};
+}
