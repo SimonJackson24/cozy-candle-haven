@@ -5,10 +5,12 @@ import { Testimonials } from "@/components/Testimonials";
 import { Collections } from "@/components/Collections";
 import { Sustainability } from "@/components/Sustainability";
 import { CandleCare } from "@/components/CandleCare";
+import { USPBanner } from "@/components/USPBanner";
 
 const Index = () => {
   return (
     <main className="min-h-screen bg-background">
+      <USPBanner />
       <Hero />
       <Benefits />
       <FeaturedProducts />
