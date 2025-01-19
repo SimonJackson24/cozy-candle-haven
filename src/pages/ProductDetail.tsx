@@ -36,9 +36,18 @@ export default function ProductDetail() {
   console.log("Product data:", product);
 
   const images = product?.images || [];
-  if (product?.thumbnail && !images.includes(product.thumbnail)) {
-    images.unshift(product.thumbnail);
+  if (product?.thumbnail) {
+    const thumbnailUrl = typeof product.thumbnail === 'string' 
+      ? product.thumbnail 
+      : product.thumbnail.url;
+    if (!images.some(img => (typeof img === 'string' ? img : img.url) === thumbnailUrl)) {
+      images.unshift(product.thumbnail);
+    }
   }
+
+  const getImageUrl = (image: any) => {
+    return typeof image === 'string' ? image : image.url;
+  };
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
@@ -115,14 +124,14 @@ export default function ProductDetail() {
             <Dialog open={isZoomDialogOpen} onOpenChange={setIsZoomDialogOpen}>
               <DialogTrigger asChild>
                 <img
-                  src={images[currentImageIndex] || "/placeholder.svg"}
+                  src={getImageUrl(images[currentImageIndex]) || "/placeholder.svg"}
                   alt={product.title}
                   className="w-full h-full object-cover cursor-zoom-in"
                 />
               </DialogTrigger>
               <DialogContent className="max-w-4xl">
                 <img
-                  src={images[currentImageIndex] || "/placeholder.svg"}
+                  src={getImageUrl(images[currentImageIndex]) || "/placeholder.svg"}
                   alt={product.title}
                   className="w-full h-full object-contain"
                 />
@@ -162,7 +171,7 @@ export default function ProductDetail() {
                   }`}
                 >
                   <img
-                    src={image || "/placeholder.svg"}
+                    src={getImageUrl(image) || "/placeholder.svg"}
                     alt={`${product.title} - Image ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
