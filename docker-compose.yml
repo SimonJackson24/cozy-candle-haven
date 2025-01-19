@@ -40,7 +40,7 @@ services:
     command: >
       sh -c "
         if [ ! -f package.json ]; then
-          npx create-medusa-app@latest . --seed --db-url postgres://medusa:medusa@postgres:5432/medusa --redis-url redis://redis:6379
+          npx create-medusa-app@latest . --seed --db-url=postgres://medusa:medusa@postgres:5432/medusa
         fi &&
         npm install &&
         npm run dev"
