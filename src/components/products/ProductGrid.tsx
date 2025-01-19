@@ -1,20 +1,9 @@
 import { ProductCard } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
-
-interface Product {
-  id: string;
-  title: string;
-  description: string;
-  thumbnail: string;
-  variants: Array<{
-    prices: Array<{
-      amount: number;
-    }>;
-  }>;
-}
+import { PricedProduct } from "@medusajs/medusa";
 
 interface ProductGridProps {
-  products: Product[] | undefined;
+  products: PricedProduct[] | undefined;
   isLoading: boolean;
 }
 
@@ -48,11 +37,11 @@ export const ProductGrid = ({ products, isLoading }: ProductGridProps) => {
       {products.map((product) => (
         <ProductCard
           key={product.id}
-          title={product.title}
-          price={product.variants[0]?.prices[0]?.amount || 0}
+          title={product.title || ""}
+          price={product.variants?.[0]?.prices?.[0]?.amount || 0}
           image={product.thumbnail || "/placeholder.svg"}
           description={product.description || ""}
-          productId={product.id}
+          productId={product.id || ""}
         />
       ))}
     </div>
