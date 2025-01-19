@@ -22,7 +22,7 @@ services:
       - medusa-network
 
   medusa:
-    image: node:18-alpine
+    image: node:20-alpine
     working_dir: /app/medusa
     volumes:
       - ./medusa-data:/app/medusa
