@@ -6,7 +6,6 @@ export const medusa = new Medusa({
   maxRetries: 3,
 });
 
-// Utility functions for common operations
 export const getProducts = async () => {
   try {
     console.log("Fetching products from Medusa...");
@@ -54,6 +53,30 @@ export const addToCart = async (cartId: string, variantId: string, quantity: num
     return cart;
   } catch (error) {
     console.error("Error adding item to cart:", error);
+    throw error;
+  }
+};
+
+export const getCollections = async () => {
+  try {
+    console.log("Fetching collections from Medusa...");
+    const { collections } = await medusa.collections.list();
+    console.log("Collections fetched:", collections);
+    return collections;
+  } catch (error) {
+    console.error("Error fetching collections:", error);
+    throw error;
+  }
+};
+
+export const getCollection = async (id: string) => {
+  try {
+    console.log("Fetching collection details for:", id);
+    const { collection } = await medusa.collections.retrieve(id);
+    console.log("Collection details:", collection);
+    return collection;
+  } catch (error) {
+    console.error("Error fetching collection:", error);
     throw error;
   }
 };
