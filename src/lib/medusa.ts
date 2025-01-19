@@ -30,3 +30,30 @@ export const getProduct = async (id: string) => {
     throw error;
   }
 };
+
+export const createCart = async () => {
+  try {
+    console.log("Creating new cart...");
+    const { cart } = await medusa.carts.create();
+    console.log("Cart created:", cart);
+    return cart;
+  } catch (error) {
+    console.error("Error creating cart:", error);
+    throw error;
+  }
+};
+
+export const addToCart = async (cartId: string, variantId: string, quantity: number) => {
+  try {
+    console.log("Adding item to cart...", { cartId, variantId, quantity });
+    const { cart } = await medusa.carts.lineItems.create(cartId, {
+      variant_id: variantId,
+      quantity: quantity,
+    });
+    console.log("Item added to cart:", cart);
+    return cart;
+  } catch (error) {
+    console.error("Error adding item to cart:", error);
+    throw error;
+  }
+};
