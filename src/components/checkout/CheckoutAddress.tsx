@@ -4,6 +4,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { medusa } from "@/lib/medusa";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+
+const addressSchema = z.object({
+  firstName: z.string().min(2, "First name must be at least 2 characters"),
+  lastName: z.string().min(2, "Last name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+  address: z.string().min(5, "Address must be at least 5 characters"),
+  city: z.string().min(2, "City must be at least 2 characters"),
+  state: z.string().min(2, "State must be at least 2 characters"),
+  zipCode: z.string().min(5, "ZIP code must be at least 5 characters"),
+  country: z.string().length(2, "Country code must be 2 characters (e.g., US)"),
+});
+
+type AddressFormValues = z.infer<typeof addressSchema>;
 
 interface CheckoutAddressProps {
   onComplete: () => void;
@@ -11,30 +35,22 @@ interface CheckoutAddressProps {
 }
 
 export function CheckoutAddress({ onComplete, isLoading }: CheckoutAddressProps) {
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    address: "",
-    city: "",
-    state: "",
-    zipCode: "",
-    country: "",
-  });
   const { toast } = useToast();
+  const form = useForm<AddressFormValues>({
+    resolver: zodResolver(addressSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      address: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      country: "US",
+    },
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (Object.values(formData).some(value => !value)) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  const onSubmit = async (data: AddressFormValues) => {
     try {
       const cartId = localStorage.getItem("cartId");
       if (!cartId) {
@@ -49,18 +65,22 @@ export function CheckoutAddress({ onComplete, isLoading }: CheckoutAddressProps)
       console.log("Updating cart with shipping address...");
       const { cart } = await medusa.carts.update(cartId, {
         shipping_address: {
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          address_1: formData.address,
-          city: formData.city,
-          country_code: formData.country,
-          postal_code: formData.zipCode,
-          province: formData.state,
+          first_name: data.firstName,
+          last_name: data.lastName,
+          address_1: data.address,
+          city: data.city,
+          country_code: data.country,
+          postal_code: data.zipCode,
+          province: data.state,
         },
-        email: formData.email,
+        email: data.email,
       });
       
       console.log("Address updated successfully:", cart);
+      toast({
+        title: "Success",
+        description: "Shipping address has been updated",
+      });
       onComplete();
     } catch (error) {
       console.error("Error updating address:", error);
@@ -72,113 +92,133 @@ export function CheckoutAddress({ onComplete, isLoading }: CheckoutAddressProps)
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <h2 className="text-xl font-semibold">Shipping Address</h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="firstName">First Name</Label>
-          <Input
-            id="firstName"
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <h2 className="text-xl font-semibold">Shipping Address</h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
             name="firstName"
-            value={formData.firstName}
-            onChange={handleChange}
-            required
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>First Name</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="lastName">Last Name</Label>
-          <Input
-            id="lastName"
+          
+          <FormField
+            control={form.control}
             name="lastName"
-            value={formData.lastName}
-            onChange={handleChange}
-            required
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Last Name</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
-      </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
+        <FormField
+          control={form.control}
           name="email"
-          type="email"
-          value={formData.email}
-          onChange={handleChange}
-          required
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input type="email" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="address">Address</Label>
-        <Input
-          id="address"
+        <FormField
+          control={form.control}
           name="address"
-          value={formData.address}
-          onChange={handleChange}
-          required
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Address</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="city">City</Label>
-          <Input
-            id="city"
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
             name="city"
-            value={formData.city}
-            onChange={handleChange}
-            required
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>City</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="state">State</Label>
-          <Input
-            id="state"
+          
+          <FormField
+            control={form.control}
             name="state"
-            value={formData.state}
-            onChange={handleChange}
-            required
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>State</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="zipCode">ZIP Code</Label>
-          <Input
-            id="zipCode"
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
             name="zipCode"
-            value={formData.zipCode}
-            onChange={handleChange}
-            required
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>ZIP Code</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="country">Country</Label>
-          <Input
-            id="country"
+          
+          <FormField
+            control={form.control}
             name="country"
-            value={formData.country}
-            onChange={handleChange}
-            required
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Country Code</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="US" maxLength={2} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
-      </div>
 
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? "Processing..." : "Continue to Shipping"}
-      </Button>
-    </form>
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? "Processing..." : "Continue to Shipping"}
+        </Button>
+      </form>
+    </Form>
   );
-};
+}
