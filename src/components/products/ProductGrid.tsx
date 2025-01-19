@@ -1,6 +1,6 @@
 import { ProductCard } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Product } from "@medusajs/medusa/dist/types/models/product";
+import { Product } from "@medusajs/medusa";
 
 interface ProductGridProps {
   products: Product[] | undefined;
