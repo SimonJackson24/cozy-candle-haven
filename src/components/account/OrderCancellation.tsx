@@ -16,7 +16,7 @@ export function OrderCancellation({ orderId, onCancelled }: OrderCancellationPro
     setIsLoading(true);
     try {
       console.log("Cancelling order:", orderId);
-      await medusa.orders.cancelOrder(orderId);
+      await medusa.orders.cancel(orderId);
       console.log("Order cancelled successfully");
       
       toast({
