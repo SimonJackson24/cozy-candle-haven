@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { medusa } from "@/lib/medusa";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface WishlistItem {
   id: string;
@@ -28,32 +29,39 @@ export function Wishlist() {
     queryKey: ["wishlist-items"],
     queryFn: async () => {
       console.log("Fetching wishlist items...");
-      // Since Medusa doesn't have built-in wishlist functionality,
-      // we'll store wishlist items in localStorage for this example
       const storedItems = localStorage.getItem("wishlist");
       const items = storedItems ? JSON.parse(storedItems) : [];
       
-      // Fetch product details for each wishlist item
-      const itemsWithDetails = await Promise.all(
-        items.map(async (item: string) => {
-          const { product } = await medusa.products.retrieve(item);
-          return {
-            id: product.id,
-            product_id: product.id,
-            created_at: new Date().toISOString(),
-            product: {
+      try {
+        const itemsWithDetails = await Promise.all(
+          items.map(async (item: string) => {
+            const { product } = await medusa.products.retrieve(item);
+            return {
               id: product.id,
-              title: product.title,
-              thumbnail: product.thumbnail,
-              handle: product.handle,
-              variants: product.variants,
-            },
-          };
-        })
-      );
-      
-      console.log("Wishlist items fetched:", itemsWithDetails);
-      return itemsWithDetails;
+              product_id: product.id,
+              created_at: new Date().toISOString(),
+              product: {
+                id: product.id,
+                title: product.title,
+                thumbnail: product.thumbnail,
+                handle: product.handle,
+                variants: product.variants,
+              },
+            };
+          })
+        );
+        
+        console.log("Wishlist items fetched:", itemsWithDetails);
+        return itemsWithDetails;
+      } catch (error) {
+        console.error("Error fetching wishlist items:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load wishlist items",
+          variant: "destructive",
+        });
+        return [];
+      }
     },
   });
 
@@ -84,52 +92,74 @@ export function Wishlist() {
   });
 
   if (isLoading) {
-    return <div>Loading wishlist...</div>;
+    return (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {[1, 2, 3].map((i) => (
+          <Card key={i} className="p-4">
+            <Skeleton className="h-48 w-full mb-4" />
+            <Skeleton className="h-4 w-2/3 mb-2" />
+            <Skeleton className="h-4 w-1/2" />
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  if (!wishlistItems.length) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">Your wishlist is empty</p>
+        <Button
+          variant="outline"
+          className="mt-4"
+          onClick={() => window.location.href = "/products"}
+        >
+          Browse Products
+        </Button>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-4">
-      {wishlistItems.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">Your wishlist is empty</p>
-        </div>
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {wishlistItems.map((item: WishlistItem) => (
-            <Card key={item.id} className="p-4">
-              <div className="relative">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-0 top-0"
-                  onClick={() => removeFromWishlistMutation.mutate(item.product_id)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-                <div className="aspect-square relative mb-4">
-                  <img
-                    src={item.product.thumbnail || "/placeholder.svg"}
-                    alt={item.product.title}
-                    className="object-cover w-full h-full rounded-md"
-                  />
-                </div>
-                <div>
-                  <h3 className="font-medium">{item.product.title}</h3>
-                  <Button
-                    variant="secondary"
-                    className="w-full mt-4"
-                    onClick={() => {
-                      window.location.href = `/products/${item.product.handle}`;
-                    }}
-                  >
-                    View Product
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      )}
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {wishlistItems.map((item: WishlistItem) => (
+        <Card key={item.id} className="p-4">
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-0 top-0"
+              onClick={() => removeFromWishlistMutation.mutate(item.product_id)}
+              disabled={removeFromWishlistMutation.isPending}
+            >
+              {removeFromWishlistMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <X className="h-4 w-4" />
+              )}
+            </Button>
+            <div className="aspect-square relative mb-4">
+              <img
+                src={item.product.thumbnail || "/placeholder.svg"}
+                alt={item.product.title}
+                className="object-cover w-full h-full rounded-md"
+              />
+            </div>
+            <div>
+              <h3 className="font-medium">{item.product.title}</h3>
+              <Button
+                variant="secondary"
+                className="w-full mt-4"
+                onClick={() => {
+                  window.location.href = `/products/${item.product.handle}`;
+                }}
+              >
+                View Product
+              </Button>
+            </div>
+          </div>
+        </Card>
+      ))}
     </div>
   );
 }
