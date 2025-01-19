@@ -1,4 +1,6 @@
 import Medusa from "@medusajs/medusa-js";
+import type { ProductCollection } from "@medusajs/medusa";
+import type { PricedProduct } from "@medusajs/medusa/dist/types/pricing";
 
 // Initialize the Medusa client
 export const medusa = new Medusa({
@@ -69,12 +71,14 @@ export const getCollections = async () => {
   }
 };
 
-export const getCollection = async (id: string) => {
+export const getCollection = async (handle: string): Promise<ProductCollection & { products: PricedProduct[] }> => {
   try {
-    console.log("Fetching collection details for:", id);
-    const { collection } = await medusa.collections.retrieve(id);
-    console.log("Collection details:", collection);
-    return collection;
+    console.log("Fetching collection details for:", handle);
+    const { collection } = await medusa.collections.list({ handle });
+    const { products } = await medusa.products.list({ collection_id: [collection.id] });
+    
+    console.log("Collection details:", { ...collection, products });
+    return { ...collection, products } as ProductCollection & { products: PricedProduct[] };
   } catch (error) {
     console.error("Error fetching collection:", error);
     throw error;

@@ -6,10 +6,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { ProductCollection } from "@medusajs/medusa";
 import type { PricedProduct } from "@medusajs/medusa/dist/types/pricing";
 
+type CollectionWithProducts = ProductCollection & { products: PricedProduct[] };
+
 export default function CollectionDetail() {
   const { handle } = useParams();
 
-  const { data: collection, isLoading, error } = useQuery<ProductCollection & { products: PricedProduct[] }>({
+  const { data: collection, isLoading, error } = useQuery<CollectionWithProducts>({
     queryKey: ["collection", handle],
     queryFn: () => getCollection(handle!),
     enabled: !!handle,
