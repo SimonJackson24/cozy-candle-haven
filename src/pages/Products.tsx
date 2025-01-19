@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
 import { getProducts } from "@/lib/medusa";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,10 +10,10 @@ import { ProductFilters } from "@/components/products/ProductFilters";
 import { ProductGrid } from "@/components/products/ProductGrid";
 import { ProductSort } from "@/components/products/ProductSort";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { PricedProduct } from "@medusajs/medusa/dist/types/pricing";
 
 const Products = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get("search") || "";
   const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
   const [priceRange, setPriceRange] = useState("all");
@@ -20,16 +21,18 @@ const Products = () => {
   const itemsPerPage = 12;
 
   const { data: products, isLoading, error } = useQuery({
-    queryKey: ["products", sortBy],
+    queryKey: ["products", sortBy, searchQuery],
     queryFn: getProducts,
   });
 
+  console.log("Search query:", searchQuery);
   console.log("Products loaded:", products?.length);
 
-  const filteredProducts = products?.filter((product: PricedProduct) => {
-    const matchesSearch = product.title
-      ?.toLowerCase()
-      .includes(searchQuery.toLowerCase());
+  const filteredProducts = products?.filter((product) => {
+    const matchesSearch = searchQuery
+      ? product.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      : true;
     const matchesCategory = category === "all" || product.collection?.handle === category;
     const price = product.variants?.[0]?.prices?.[0]?.amount || 0;
     const matchesPrice = priceRange === "all" ||
@@ -61,19 +64,23 @@ const Products = () => {
       <div className="container py-8">
         <div className="flex flex-col gap-8">
           <div className="flex flex-col gap-4">
-            <h1 className="text-4xl font-serif">Our Products</h1>
+            <h1 className="text-4xl font-serif">
+              {searchQuery ? `Search Results for "${searchQuery}"` : "Our Products"}
+            </h1>
             <p className="text-muted-foreground">
-              Discover our collection of handcrafted luxury candles
+              {searchQuery
+                ? `Showing results for "${searchQuery}"`
+                : "Discover our collection of handcrafted luxury candles"}
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <div className="w-full sm:w-72">
               <Input
-                placeholder="Search products..."
+                placeholder="Filter in results..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full"
+                readOnly
+                className="w-full bg-muted"
               />
             </div>
             <div className="flex gap-4 w-full sm:w-auto">

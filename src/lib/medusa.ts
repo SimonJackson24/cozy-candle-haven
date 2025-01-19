@@ -11,7 +11,9 @@ export const medusa = new Medusa({
 export const getProducts = async () => {
   try {
     console.log("Fetching products from Medusa...");
-    const { products } = await medusa.products.list();
+    const { products } = await medusa.products.list({
+      limit: 100,
+    });
     console.log("Products fetched:", products);
     return products;
   } catch (error) {
