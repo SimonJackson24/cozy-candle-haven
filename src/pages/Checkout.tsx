@@ -9,12 +9,14 @@ import { CheckoutShipping } from "@/components/checkout/CheckoutShipping";
 import { CheckoutPayment } from "@/components/checkout/CheckoutPayment";
 import { CheckoutSummary } from "@/components/checkout/CheckoutSummary";
 
+type CheckoutStep = "address" | "shipping" | "payment";
+
 const Checkout = () => {
-  const [step, setStep] = useState<"address" | "shipping" | "payment">("address");
+  const [step, setStep] = useState<CheckoutStep>("address");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [cartId, setCartId] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const storedCartId = localStorage.getItem("cartId");
@@ -25,10 +27,19 @@ const Checkout = () => {
     setCartId(storedCartId);
   }, [navigate]);
 
-  const handleStepComplete = async (nextStep: "shipping" | "payment" | "complete") => {
+  const handleStepComplete = async (nextStep: CheckoutStep | "complete") => {
     try {
       setIsLoading(true);
-      // Add validation and API calls here based on the current step
+      if (nextStep === "complete") {
+        // Handle order completion
+        console.log("Processing order completion");
+        toast({
+          title: "Order Completed",
+          description: "Thank you for your purchase!",
+        });
+        navigate("/order-confirmation");
+        return;
+      }
       setStep(nextStep);
     } catch (error) {
       console.error("Error processing step:", error);
