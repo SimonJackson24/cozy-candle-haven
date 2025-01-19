@@ -49,13 +49,14 @@ export const UserRolesManager = () => {
           user_id,
           role,
           created_at,
-          profiles:user_id (
+          profiles (
             username
           )
-        `);
+        `)
+        .returns<UserRoleWithProfile[]>();
       
       if (error) throw error;
-      return data as UserRoleWithProfile[];
+      return data;
     },
   });
 
