@@ -4,7 +4,7 @@ import { Auth as SupabaseAuth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -15,11 +15,10 @@ const Auth = () => {
       console.log("Auth state changed:", event, session);
       
       if (event === "SIGNED_IN" && session) {
-        console.log("Your user ID is:", session.user.id);
+        console.log("User signed in:", session.user.id);
         toast({
           title: "Welcome!",
-          description: `Please copy your User ID: ${session.user.id}`,
-          duration: 10000, // Show for 10 seconds
+          description: "You have successfully signed in.",
         });
         navigate("/");
       }
