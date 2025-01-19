@@ -6,6 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import { medusa } from "@/lib/medusa";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "react-router-dom";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface CartItem {
   id: string;
@@ -23,6 +25,8 @@ export function Cart() {
   const [isOpen, setIsOpen] = useState(false);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [orderNotes, setOrderNotes] = useState("");
+  const [isGift, setIsGift] = useState(false);
   const { toast } = useToast();
   const [cartId, setCartId] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -118,7 +122,15 @@ export function Cart() {
 
     try {
       setIsLoading(true);
-      // Here we'll add the checkout creation logic later
+      
+      // Update cart with notes and gift options
+      await medusa.carts.update(cartId, {
+        context: {
+          order_notes: orderNotes,
+          is_gift: isGift
+        }
+      });
+
       navigate("/checkout");
       setIsOpen(false);
     } catch (error) {
@@ -168,7 +180,7 @@ export function Cart() {
             </div>
           ) : (
             <>
-              <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+              <div className="space-y-4 max-h-[40vh] overflow-y-auto">
                 {cartItems.map((item) => (
                   <div
                     key={item.id}
@@ -225,8 +237,31 @@ export function Cart() {
                   </div>
                 ))}
               </div>
-              <div className="pt-4 space-y-4">
+
+              <div className="space-y-4">
+                <Textarea
+                  placeholder="Add any notes about your order..."
+                  value={orderNotes}
+                  onChange={(e) => setOrderNotes(e.target.value)}
+                  className="w-full"
+                />
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="gift"
+                    checked={isGift}
+                    onCheckedChange={(checked) => setIsGift(checked as boolean)}
+                  />
+                  <label
+                    htmlFor="gift"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    This is a gift
+                  </label>
+                </div>
+
                 <Separator />
+
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Subtotal</span>
@@ -242,6 +277,7 @@ export function Cart() {
                     <span>${(total / 100).toFixed(2)}</span>
                   </div>
                 </div>
+
                 <Button 
                   className="w-full" 
                   onClick={proceedToCheckout}

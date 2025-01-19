@@ -16,6 +16,7 @@ const Checkout = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const [cartId, setCartId] = useState<string | null>(null);
+  const [cartData, setCartData] = useState<any>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,13 +26,28 @@ const Checkout = () => {
       return;
     }
     setCartId(storedCartId);
+    fetchCart(storedCartId);
   }, [navigate]);
+
+  const fetchCart = async (id: string) => {
+    try {
+      const { cart } = await medusa.carts.retrieve(id);
+      setCartData(cart);
+      console.log("Cart data in checkout:", cart);
+    } catch (error) {
+      console.error("Error fetching cart:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load cart details",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleStepComplete = async (nextStep: CheckoutStep | "complete") => {
     try {
       setIsLoading(true);
       if (nextStep === "complete") {
-        // Handle order completion
         console.log("Processing order completion");
         toast({
           title: "Order Completed",
@@ -52,6 +68,10 @@ const Checkout = () => {
       setIsLoading(false);
     }
   };
+
+  // Display order notes and gift status if present
+  const orderNotes = cartData?.context?.order_notes;
+  const isGift = cartData?.context?.is_gift;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -76,6 +96,19 @@ const Checkout = () => {
           </div>
 
           <Separator />
+
+          {orderNotes && (
+            <div className="bg-muted p-4 rounded-lg">
+              <h3 className="font-medium mb-2">Order Notes:</h3>
+              <p className="text-sm text-muted-foreground">{orderNotes}</p>
+            </div>
+          )}
+
+          {isGift && (
+            <div className="bg-accent/10 p-4 rounded-lg">
+              <h3 className="font-medium text-accent">🎁 This order is a gift</h3>
+            </div>
+          )}
 
           {/* Step Content */}
           {step === "address" && (
