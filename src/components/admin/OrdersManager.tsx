@@ -28,7 +28,7 @@ type Order = {
   username: string | null;
 };
 
-type OrderWithProfile = {
+type OrderResponse = {
   id: string;
   created_at: string;
   status: string;
@@ -36,7 +36,7 @@ type OrderWithProfile = {
   user_id: string;
   profiles: {
     username: string | null;
-  } | null;
+  }[] | null;
 }
 
 export function OrdersManager() {
@@ -77,7 +77,7 @@ export function OrdersManager() {
       }
 
       // Transform the data to match our Order type
-      const transformedOrders: Order[] = data.map(order => ({
+      const transformedOrders: Order[] = (data as OrderResponse[]).map(order => ({
         id: order.id,
         created_at: order.created_at,
         status: order.status,
