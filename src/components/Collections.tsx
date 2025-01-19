@@ -4,10 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import { getCollections } from "@/lib/medusa";
 import { Link } from "react-router-dom";
 import { Skeleton } from "./ui/skeleton";
-import type { Collection } from "@medusajs/medusa/dist/models/collection";
+import type { ProductCollection } from "@medusajs/medusa";
 
 export const Collections = () => {
-  const { data: collections, isLoading, error } = useQuery<Collection[]>({
+  const { data: collections, isLoading, error } = useQuery<ProductCollection[]>({
     queryKey: ["collections"],
     queryFn: getCollections,
   });
