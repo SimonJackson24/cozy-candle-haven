@@ -28,6 +28,10 @@ type Order = {
   username: string | null;
 };
 
+type ProfileResponse = {
+  username: string | null;
+}
+
 export function OrdersManager() {
   const { toast } = useToast();
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
@@ -72,7 +76,7 @@ export function OrdersManager() {
         status: order.status,
         total_amount: order.total_amount,
         user_id: order.user_id,
-        username: order.username?.[0]?.username ?? null
+        username: (order.username as ProfileResponse[] | null)?.[0]?.username ?? null
       }));
 
       console.log("Fetched and transformed orders:", transformedOrders);
