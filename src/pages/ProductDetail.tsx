@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ProductGallery } from "@/components/products/ProductGallery";
 import { ProductVariantSelector } from "@/components/products/ProductVariantSelector";
 import { QuantitySelector } from "@/components/products/QuantitySelector";
+import { PricedProduct } from "@medusajs/medusa/dist/types/pricing";
 
 type Image = {
   url: string;
