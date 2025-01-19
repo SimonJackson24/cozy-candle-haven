@@ -1,37 +1,23 @@
 import { ProductCard } from "./ProductCard";
-
-const FEATURED_PRODUCTS = [
-  {
-    id: 1,
-    title: "Lavender Dreams Candle",
-    price: 24.99,
-    image: "/placeholder.svg",
-    description: "Soothing lavender scent for relaxation",
-  },
-  {
-    id: 2,
-    title: "Vanilla Bean Melt",
-    price: 12.99,
-    image: "/placeholder.svg",
-    description: "Rich vanilla fragrance for cozy spaces",
-  },
-  {
-    id: 3,
-    title: "Ceramic Wax Burner",
-    price: 34.99,
-    image: "/placeholder.svg",
-    description: "Elegant design with ambient lighting",
-  },
-  {
-    id: 4,
-    title: "Ocean Breeze Candle",
-    price: 22.99,
-    image: "/placeholder.svg",
-    description: "Fresh marine scent for any room",
-  },
-];
+import { useQuery } from "@tanstack/react-query";
+import { getProducts } from "@/lib/medusa";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const FeaturedProducts = () => {
+  const { data: products, isLoading, error } = useQuery({
+    queryKey: ["products"],
+    queryFn: getProducts,
+  });
+
+  if (error) {
+    console.error("Error loading products:", error);
+    return (
+      <div className="text-center text-red-500">
+        Failed to load products. Please try again later.
+      </div>
+    );
+  }
+
   return (
     <section className="py-24 bg-gradient-to-b from-white to-primary/10">
       <div className="container">
@@ -45,9 +31,25 @@ export const FeaturedProducts = () => {
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {FEATURED_PRODUCTS.map((product) => (
-            <ProductCard key={product.id} {...product} />
-          ))}
+          {isLoading ? (
+            Array(4).fill(0).map((_, index) => (
+              <div key={index} className="space-y-4">
+                <Skeleton className="h-[300px] w-full" />
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+            ))
+          ) : (
+            products?.slice(0, 4).map((product) => (
+              <ProductCard
+                key={product.id}
+                title={product.title}
+                price={product.variants[0]?.prices[0]?.amount || 0}
+                image={product.thumbnail || "/placeholder.svg"}
+                description={product.description || ""}
+              />
+            ))
+          )}
         </div>
       </div>
     </section>
