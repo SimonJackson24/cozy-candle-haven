@@ -3,11 +3,13 @@ import { useQuery } from "@tanstack/react-query";
 import { getCollection } from "@/lib/medusa";
 import { ProductGrid } from "@/components/products/ProductGrid";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Collection } from "@medusajs/medusa";
+import { PricedProduct } from "@medusajs/medusa/dist/types/pricing";
 
 export default function CollectionDetail() {
   const { handle } = useParams();
 
-  const { data: collection, isLoading, error } = useQuery({
+  const { data: collection, isLoading, error } = useQuery<Collection & { products: PricedProduct[] }>({
     queryKey: ["collection", handle],
     queryFn: () => getCollection(handle!),
     enabled: !!handle,
@@ -33,9 +35,9 @@ export default function CollectionDetail() {
           </div>
         ) : (
           <div className="mb-8">
-            <h1 className="text-4xl font-serif mb-4">{collection?.title}</h1>
+            <h1 className="text-4xl font-serif mb-4">{collection?.title || "Collection"}</h1>
             <p className="text-muted-foreground">
-              {collection?.metadata?.description || "Explore our collection"}
+              {(collection?.metadata?.description as string) || "Explore our collection"}
             </p>
           </div>
         )}

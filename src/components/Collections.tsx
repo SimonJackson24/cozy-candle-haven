@@ -4,9 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import { getCollections } from "@/lib/medusa";
 import { Link } from "react-router-dom";
 import { Skeleton } from "./ui/skeleton";
+import { Collection } from "@medusajs/medusa";
 
 export const Collections = () => {
-  const { data: collections, isLoading, error } = useQuery({
+  const { data: collections, isLoading, error } = useQuery<Collection[]>({
     queryKey: ["collections"],
     queryFn: getCollections,
   });
@@ -45,13 +46,13 @@ export const Collections = () => {
               className="group relative overflow-hidden rounded-lg aspect-[4/5]"
             >
               <img
-                src={collection.metadata?.thumbnail || "/placeholder.svg"}
-                alt={collection.title}
+                src={(collection.metadata?.thumbnail as string) || "/placeholder.svg"}
+                alt={collection.title || "Collection"}
                 className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent p-6 flex flex-col justify-end text-white">
                 <h3 className="font-serif text-2xl mb-2">{collection.title}</h3>
-                <p className="text-white/80 mb-4">{collection.metadata?.description || "Explore our collection"}</p>
+                <p className="text-white/80 mb-4">{(collection.metadata?.description as string) || "Explore our collection"}</p>
                 <Link to={`/collections/${collection.handle}`}>
                   <Button 
                     variant="outline" 
