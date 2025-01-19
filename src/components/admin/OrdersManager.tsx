@@ -72,7 +72,7 @@ export function OrdersManager() {
         status: order.status,
         total_amount: order.total_amount,
         user_id: order.user_id,
-        username: order.username?.[0]?.username || null
+        username: order.username?.[0]?.username ?? null
       }));
 
       console.log("Fetched and transformed orders:", transformedOrders);
