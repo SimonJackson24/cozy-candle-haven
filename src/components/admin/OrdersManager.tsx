@@ -28,8 +28,15 @@ type Order = {
   username: string | null;
 };
 
-type ProfileResponse = {
-  username: string | null;
+type OrderWithProfile = {
+  id: string;
+  created_at: string;
+  status: string;
+  total_amount: number;
+  user_id: string;
+  profiles: {
+    username: string | null;
+  } | null;
 }
 
 export function OrdersManager() {
@@ -49,7 +56,7 @@ export function OrdersManager() {
           status,
           total_amount,
           user_id,
-          username:profiles(username)
+          profiles:profiles!orders_user_id_fkey(username)
         `)
         .order('created_at', { ascending: false });
 
@@ -70,13 +77,13 @@ export function OrdersManager() {
       }
 
       // Transform the data to match our Order type
-      const transformedOrders: Order[] = data.map(order => ({
+      const transformedOrders: Order[] = (data as OrderWithProfile[]).map(order => ({
         id: order.id,
         created_at: order.created_at,
         status: order.status,
         total_amount: order.total_amount,
         user_id: order.user_id,
-        username: (order.username as ProfileResponse[] | null)?.[0]?.username ?? null
+        username: order.profiles?.username ?? null
       }));
 
       console.log("Fetched and transformed orders:", transformedOrders);
