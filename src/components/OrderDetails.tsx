@@ -3,13 +3,19 @@ import { medusa } from "@/lib/medusa";
 import { formatDate } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import { OrderCancellation } from "./account/OrderCancellation";
+import { ReturnRequest } from "./account/ReturnRequest";
+import { useState } from "react";
+import { Button } from "./ui/button";
 
 interface OrderDetailsProps {
   orderId: string;
 }
 
 export function OrderDetails({ orderId }: OrderDetailsProps) {
-  const { data: order, isLoading } = useQuery({
+  const [showReturnForm, setShowReturnForm] = useState(false);
+  
+  const { data: order, isLoading, refetch } = useQuery({
     queryKey: ["order", orderId],
     queryFn: async () => {
       console.log("Fetching order details:", orderId);
@@ -33,6 +39,9 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
     return <div>Order not found</div>;
   }
 
+  const canBeCancelled = ["pending", "processing"].includes(order.status);
+  const canBeReturned = ["completed", "shipped"].includes(order.status);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-start">
@@ -49,6 +58,36 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
           </p>
         </div>
       </div>
+
+      {/* Order Actions */}
+      <div className="flex gap-4">
+        {canBeCancelled && (
+          <OrderCancellation 
+            orderId={order.id} 
+            onCancelled={refetch}
+          />
+        )}
+        {canBeReturned && !showReturnForm && (
+          <Button onClick={() => setShowReturnForm(true)}>
+            Request Return
+          </Button>
+        )}
+      </div>
+
+      {/* Return Form */}
+      {showReturnForm && canBeReturned && (
+        <div className="border rounded-lg p-4">
+          <h3 className="text-lg font-medium mb-4">Return Request</h3>
+          <ReturnRequest
+            orderId={order.id}
+            items={order.items}
+            onRequestSubmitted={() => {
+              setShowReturnForm(false);
+              refetch();
+            }}
+          />
+        </div>
+      )}
 
       <div className="space-y-4">
         {order.items?.map((item: any) => (
