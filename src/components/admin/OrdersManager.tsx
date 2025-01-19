@@ -25,19 +25,10 @@ type Order = {
   status: string;
   total_amount: number;
   user_id: string;
-  username: string | null;
-};
-
-type OrderWithUser = {
-  id: string;
-  created_at: string;
-  status: string;
-  total_amount: number;
-  user_id: string;
-  user: {
+  profiles: {
     username: string | null;
   } | null;
-}
+};
 
 export function OrdersManager() {
   const { toast } = useToast();
@@ -56,7 +47,7 @@ export function OrdersManager() {
           status,
           total_amount,
           user_id,
-          user:user_id (
+          profiles (
             username
           )
         `)
@@ -78,18 +69,8 @@ export function OrdersManager() {
         return [];
       }
 
-      // Transform the data to match our Order type
-      const transformedOrders: Order[] = (data as OrderWithUser[]).map(order => ({
-        id: order.id,
-        created_at: order.created_at,
-        status: order.status,
-        total_amount: order.total_amount,
-        user_id: order.user_id,
-        username: order.user?.username ?? null
-      }));
-
-      console.log("Fetched and transformed orders:", transformedOrders);
-      return transformedOrders;
+      console.log("Fetched orders:", data);
+      return data as Order[];
     },
   });
 
@@ -161,7 +142,7 @@ export function OrdersManager() {
               <TableCell>
                 {new Date(order.created_at).toLocaleDateString()}
               </TableCell>
-              <TableCell>{order.username || "Anonymous"}</TableCell>
+              <TableCell>{order.profiles?.username || "Anonymous"}</TableCell>
               <TableCell>${order.total_amount.toFixed(2)}</TableCell>
               <TableCell>
                 <Badge
