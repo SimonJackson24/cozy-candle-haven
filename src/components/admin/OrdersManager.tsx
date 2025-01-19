@@ -25,9 +25,9 @@ type Order = {
   status: string;
   total_amount: number;
   user_id: string;
-  profiles: {
+  profiles?: {
     username: string | null;
-  };
+  } | null;
 };
 
 export function OrdersManager() {
@@ -35,13 +35,15 @@ export function OrdersManager() {
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
 
   const { data: orders, isLoading } = useQuery({
-    queryKey: ["orders"],
+    queryKey: ["orders", selectedStatus],
     queryFn: async () => {
+      console.log("Fetching orders with status:", selectedStatus);
+      
       const query = supabase
         .from("orders")
         .select(`
           *,
-          profiles (
+          profiles:user_id (
             username
           )
         `)
@@ -63,11 +65,14 @@ export function OrdersManager() {
         return [];
       }
 
+      console.log("Fetched orders:", data);
       return data as Order[];
     },
   });
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    console.log("Updating order status:", orderId, newStatus);
+    
     const { error } = await supabase
       .from("orders")
       .update({ status: newStatus })
