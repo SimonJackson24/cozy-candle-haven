@@ -1,35 +1,14 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getProducts } from "@/lib/medusa";
-import { ProductCard } from "@/components/ProductCard";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { SlidersHorizontal } from "lucide-react";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+import { ProductFilters } from "@/components/products/ProductFilters";
+import { ProductGrid } from "@/components/products/ProductGrid";
+import { ProductSort } from "@/components/products/ProductSort";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
 const Products = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -80,7 +59,6 @@ const Products = () => {
     <div className="min-h-screen bg-background">
       <div className="container py-8">
         <div className="flex flex-col gap-8">
-          {/* Header */}
           <div className="flex flex-col gap-4">
             <h1 className="text-4xl font-serif">Our Products</h1>
             <p className="text-muted-foreground">
@@ -88,7 +66,6 @@ const Products = () => {
             </p>
           </div>
 
-          {/* Filters */}
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <div className="w-full sm:w-72">
               <Input
@@ -99,96 +76,25 @@ const Products = () => {
               />
             </div>
             <div className="flex gap-4 w-full sm:w-auto">
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="newest">Newest</SelectItem>
-                  <SelectItem value="price-low">Price: Low to High</SelectItem>
-                  <SelectItem value="price-high">Price: High to Low</SelectItem>
-                </SelectContent>
-              </Select>
+              <ProductSort sortBy={sortBy} onSortChange={setSortBy} />
               <Sheet>
                 <SheetTrigger asChild>
                   <Button variant="outline" size="icon">
                     <SlidersHorizontal className="h-4 w-4" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent>
-                  <SheetHeader>
-                    <SheetTitle>Filters</SheetTitle>
-                    <SheetDescription>
-                      Refine your product search
-                    </SheetDescription>
-                  </SheetHeader>
-                  <div className="py-4 space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Price Range</label>
-                      <Select value={priceRange} onValueChange={setPriceRange}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select price range" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Prices</SelectItem>
-                          <SelectItem value="under50">Under $50</SelectItem>
-                          <SelectItem value="50to100">$50 - $100</SelectItem>
-                          <SelectItem value="over100">Over $100</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Category</label>
-                      <Select value={category} onValueChange={setCategory}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Categories</SelectItem>
-                          <SelectItem value="candles">Candles</SelectItem>
-                          <SelectItem value="melts">Melts</SelectItem>
-                          <SelectItem value="accessories">Accessories</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </SheetContent>
+                <ProductFilters
+                  priceRange={priceRange}
+                  setPriceRange={setPriceRange}
+                  category={category}
+                  setCategory={setCategory}
+                />
               </Sheet>
             </div>
           </div>
 
-          {/* Product Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {isLoading
-              ? Array(8)
-                  .fill(0)
-                  .map((_, index) => (
-                    <div key={index} className="space-y-4">
-                      <Skeleton className="h-[300px] w-full" />
-                      <Skeleton className="h-4 w-2/3" />
-                      <Skeleton className="h-4 w-1/2" />
-                    </div>
-                  ))
-              : paginatedProducts?.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    title={product.title}
-                    price={product.variants[0]?.prices[0]?.amount || 0}
-                    image={product.thumbnail || "/placeholder.svg"}
-                    description={product.description || ""}
-                    productId={product.id}
-                  />
-                ))}
-          </div>
+          <ProductGrid products={paginatedProducts} isLoading={isLoading} />
 
-          {/* Empty State */}
-          {filteredProducts?.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No products found.</p>
-            </div>
-          )}
-
-          {/* Pagination */}
           {totalPages > 1 && (
             <Pagination className="mt-8">
               <PaginationContent>
