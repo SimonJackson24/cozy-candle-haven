@@ -5,7 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProductsManager } from "@/components/admin/ProductsManager";
 import { CategoriesManager } from "@/components/admin/CategoriesManager";
 import { UserRolesManager } from "@/components/admin/UserRolesManager";
-import { useToast } from "@/components/ui/use-toast";
+import { OrdersManager } from "@/components/admin/OrdersManager";
+import { useToast } from "@/hooks/use-toast";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -62,12 +63,17 @@ const Admin = () => {
       <Tabs defaultValue="products" className="space-y-4">
         <TabsList>
           <TabsTrigger value="products">Products</TabsTrigger>
+          <TabsTrigger value="orders">Orders</TabsTrigger>
           <TabsTrigger value="categories">Categories</TabsTrigger>
           <TabsTrigger value="users">User Roles</TabsTrigger>
         </TabsList>
         
         <TabsContent value="products" className="space-y-4">
           <ProductsManager />
+        </TabsContent>
+
+        <TabsContent value="orders" className="space-y-4">
+          <OrdersManager />
         </TabsContent>
         
         <TabsContent value="categories" className="space-y-4">
