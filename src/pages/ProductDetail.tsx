@@ -1,10 +1,7 @@
 import { useParams } from "react-router-dom";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { getProduct, createCart, addToCart } from "@/lib/medusa";
+import { useQuery } from "@tanstack/react-query";
+import { getProduct, medusa } from "@/lib/medusa";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ShoppingCart, Heart, Minus, Plus } from "lucide-react";
-import { useState } from "react";
 import {
   Select,
   SelectContent,
@@ -12,129 +9,121 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { Minus, Plus } from "lucide-react";
 
-const ProductDetail = () => {
+export default function ProductDetail() {
   const { id } = useParams();
   const { toast } = useToast();
-  const [selectedVariant, setSelectedVariant] = useState<string>("");
+  const [selectedVariant, setSelectedVariant] = useState("");
   const [quantity, setQuantity] = useState(1);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
 
-  const { data: product, isLoading, error } = useQuery({
+  const { data: product, isLoading } = useQuery({
     queryKey: ["product", id],
-    queryFn: () => getProduct(id as string),
+    queryFn: () => getProduct(id!),
     enabled: !!id,
   });
 
-  const createCartMutation = useMutation({
-    mutationFn: createCart,
-    onSuccess: async (cart) => {
-      if (selectedVariant) {
-        await addToCartMutation.mutateAsync({
-          cartId: cart.id,
-          variantId: selectedVariant,
-          quantity,
-        });
-      }
-    },
-  });
-
-  const addToCartMutation = useMutation({
-    mutationFn: ({ cartId, variantId, quantity }: { cartId: string; variantId: string; quantity: number }) =>
-      addToCart(cartId, variantId, quantity),
-    onSuccess: () => {
-      toast({
-        title: "Added to cart",
-        description: "The item has been added to your cart",
-      });
-    },
-  });
-
-  const handleAddToCart = async () => {
+  const addToCart = async () => {
     if (!selectedVariant) {
       toast({
-        title: "Please select a variant",
-        description: "You must select a variant before adding to cart",
+        title: "Error",
+        description: "Please select a variant",
         variant: "destructive",
       });
       return;
     }
-    await createCartMutation.mutateAsync();
+
+    try {
+      setIsAddingToCart(true);
+      let cartId = localStorage.getItem("cartId");
+
+      if (!cartId) {
+        const { cart } = await medusa.carts.create();
+        cartId = cart.id;
+        localStorage.setItem("cartId", cart.id);
+      }
+
+      await medusa.carts.lineItems.create(cartId, {
+        variant_id: selectedVariant,
+        quantity,
+      });
+
+      toast({
+        title: "Success",
+        description: "Item added to cart",
+      });
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add item to cart",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAddingToCart(false);
+    }
   };
 
-  if (error) {
-    console.error("Error loading product:", error);
+  if (isLoading) {
     return (
-      <div className="container py-12">
-        <div className="text-center text-red-500">
-          Failed to load product. Please try again later.
+      <div className="container mx-auto px-4 py-8">
+        <div className="animate-pulse">
+          <div className="h-96 bg-muted rounded-lg"></div>
         </div>
       </div>
     );
   }
 
-  if (isLoading) {
+  if (!product) {
     return (
-      <div className="container py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <Skeleton className="h-[500px] w-full" />
-          <div className="space-y-4">
-            <Skeleton className="h-8 w-2/3" />
-            <Skeleton className="h-6 w-1/3" />
-            <Skeleton className="h-24 w-full" />
-            <Skeleton className="h-12 w-full" />
-          </div>
-        </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">Product not found</div>
       </div>
     );
   }
 
   return (
-    <div className="container py-12">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="relative">
+    <div className="container mx-auto px-4 py-8">
+      <div className="grid md:grid-cols-2 gap-8">
+        <div>
           <img
-            src={product?.thumbnail || "/placeholder.svg"}
-            alt={product?.title}
-            className="w-full h-auto rounded-lg"
+            src={product.thumbnail || "/placeholder.svg"}
+            alt={product.title}
+            className="w-full h-[500px] object-cover rounded-lg"
           />
-          <button className="absolute top-4 right-4 p-2 rounded-full bg-white/80 hover:bg-white transition-colors">
-            <Heart className="w-5 h-5 text-gray-600" />
-          </button>
         </div>
-        <div className="space-y-6">
-          <h1 className="text-3xl font-serif">{product?.title}</h1>
-          <p className="text-2xl font-medium">
-            ${((product?.variants[0]?.prices[0]?.amount || 0) / 100).toFixed(2)}
-          </p>
-          <p className="text-gray-600 leading-relaxed">
-            {product?.description}
-          </p>
-
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Variant</label>
-              <Select value={selectedVariant} onValueChange={setSelectedVariant}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select variant" />
+        <div>
+          <h1 className="text-3xl font-serif mb-4">{product.title}</h1>
+          <p className="text-muted-foreground mb-6">{product.description}</p>
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium mb-2">Variant</label>
+              <Select
+                value={selectedVariant}
+                onValueChange={setSelectedVariant}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a variant" />
                 </SelectTrigger>
                 <SelectContent>
-                  {product?.variants.map((variant) => (
+                  {product.variants.map((variant) => (
                     <SelectItem key={variant.id} value={variant.id}>
-                      {variant.title}
+                      {variant.title} - ${(variant.prices[0].amount / 100).toFixed(2)}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Quantity</label>
-              <div className="flex items-center space-x-2">
+            <div>
+              <label className="block text-sm font-medium mb-2">Quantity</label>
+              <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
                 >
                   <Minus className="h-4 w-4" />
                 </Button>
@@ -142,28 +131,26 @@ const ProductDetail = () => {
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => setQuantity((q) => q + 1)}
+                  onClick={() => setQuantity(quantity + 1)}
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
             </div>
+            <Button
+              className="w-full"
+              onClick={addToCart}
+              disabled={isAddingToCart}
+            >
+              {isAddingToCart ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              ) : (
+                "Add to Cart"
+              )}
+            </Button>
           </div>
-
-          <Button 
-            className="w-full bg-accent hover:bg-accent/90 text-accent-foreground gap-2"
-            onClick={handleAddToCart}
-            disabled={createCartMutation.isPending || addToCartMutation.isPending}
-          >
-            <ShoppingCart className="w-4 h-4" />
-            {createCartMutation.isPending || addToCartMutation.isPending
-              ? "Adding to Cart..."
-              : "Add to Cart"}
-          </Button>
         </div>
       </div>
     </div>
   );
-};
-
-export default ProductDetail;
+}
