@@ -22,7 +22,7 @@ services:
       - medusa-network
 
   medusa:
-    image: ghcr.io/medusajs/medusa-arm64:latest
+    image: medusajs/medusa:latest
     depends_on:
       - postgres
       - redis
