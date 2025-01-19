@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { medusa } from "@/lib/medusa";
 
 interface CheckoutPaymentProps {
   onComplete: () => void;
@@ -22,7 +23,6 @@ export function CheckoutPayment({ onComplete, onBack, isLoading }: CheckoutPayme
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Basic validation
     if (Object.values(formData).some(value => !value)) {
       toast({
         title: "Error",
@@ -32,8 +32,35 @@ export function CheckoutPayment({ onComplete, onBack, isLoading }: CheckoutPayme
       return;
     }
 
-    // Here we'll process the payment via Medusa's API
-    onComplete();
+    try {
+      const cartId = localStorage.getItem("cartId");
+      if (!cartId) {
+        toast({
+          title: "Error",
+          description: "No cart found",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // First, complete the cart
+      console.log("Completing cart...");
+      const { cart } = await medusa.carts.complete(cartId);
+      console.log("Cart completed successfully:", cart);
+
+      // Clear the cart ID from localStorage
+      localStorage.removeItem("cartId");
+
+      // Move to order confirmation
+      onComplete();
+    } catch (error) {
+      console.error("Error completing order:", error);
+      toast({
+        title: "Error",
+        description: "Failed to complete order",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,4 +139,4 @@ export function CheckoutPayment({ onComplete, onBack, isLoading }: CheckoutPayme
       </div>
     </form>
   );
-}
+};

@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { medusa } from "@/lib/medusa";
 
 interface CheckoutShippingProps {
   onComplete: () => void;
@@ -12,13 +13,26 @@ interface CheckoutShippingProps {
 
 export function CheckoutShipping({ onComplete, onBack, isLoading }: CheckoutShippingProps) {
   const [selectedMethod, setSelectedMethod] = useState<string>("");
+  const [shippingOptions, setShippingOptions] = useState<any[]>([]);
   const { toast } = useToast();
 
-  const shippingMethods = [
-    { id: "standard", name: "Standard Shipping", price: 5.99, duration: "3-5 business days" },
-    { id: "express", name: "Express Shipping", price: 15.99, duration: "1-2 business days" },
-    { id: "overnight", name: "Overnight Shipping", price: 29.99, duration: "Next business day" },
-  ];
+  useEffect(() => {
+    const fetchShippingOptions = async () => {
+      try {
+        const cartId = localStorage.getItem("cartId");
+        if (!cartId) return;
+
+        console.log("Fetching shipping options...");
+        const { shipping_options } = await medusa.shippingOptions.list();
+        console.log("Available shipping options:", shipping_options);
+        setShippingOptions(shipping_options);
+      } catch (error) {
+        console.error("Error fetching shipping options:", error);
+      }
+    };
+
+    fetchShippingOptions();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,8 +46,32 @@ export function CheckoutShipping({ onComplete, onBack, isLoading }: CheckoutShip
       return;
     }
 
-    // Here we'll add the shipping method to the cart via Medusa's API
-    onComplete();
+    try {
+      const cartId = localStorage.getItem("cartId");
+      if (!cartId) {
+        toast({
+          title: "Error",
+          description: "No cart found",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log("Adding shipping method to cart...");
+      const { cart } = await medusa.carts.addShippingMethod(cartId, {
+        option_id: selectedMethod,
+      });
+      
+      console.log("Shipping method added successfully:", cart);
+      onComplete();
+    } catch (error) {
+      console.error("Error adding shipping method:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add shipping method",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -45,24 +83,24 @@ export function CheckoutShipping({ onComplete, onBack, isLoading }: CheckoutShip
         onValueChange={setSelectedMethod}
         className="space-y-4"
       >
-        {shippingMethods.map((method) => (
+        {shippingOptions.map((option) => (
           <div
-            key={method.id}
+            key={option.id}
             className="flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:border-primary"
           >
-            <RadioGroupItem value={method.id} id={method.id} />
+            <RadioGroupItem value={option.id} id={option.id} />
             <Label
-              htmlFor={method.id}
+              htmlFor={option.id}
               className="flex flex-1 justify-between cursor-pointer"
             >
               <div>
-                <div className="font-medium">{method.name}</div>
+                <div className="font-medium">{option.name}</div>
                 <div className="text-sm text-muted-foreground">
-                  {method.duration}
+                  {option.data?.description || "Standard shipping"}
                 </div>
               </div>
               <div className="font-medium">
-                ${method.price.toFixed(2)}
+                ${(option.amount / 100).toFixed(2)}
               </div>
             </Label>
           </div>

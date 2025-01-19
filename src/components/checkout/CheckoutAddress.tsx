@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { medusa } from "@/lib/medusa";
 
 interface CheckoutAddressProps {
   onComplete: () => void;
@@ -25,7 +26,6 @@ export function CheckoutAddress({ onComplete, isLoading }: CheckoutAddressProps)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Basic validation
     if (Object.values(formData).some(value => !value)) {
       toast({
         title: "Error",
@@ -35,8 +35,41 @@ export function CheckoutAddress({ onComplete, isLoading }: CheckoutAddressProps)
       return;
     }
 
-    // Here we'll add the address to the cart via Medusa's API
-    onComplete();
+    try {
+      const cartId = localStorage.getItem("cartId");
+      if (!cartId) {
+        toast({
+          title: "Error",
+          description: "No cart found",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log("Updating cart with shipping address...");
+      const { cart } = await medusa.carts.update(cartId, {
+        shipping_address: {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          address_1: formData.address,
+          city: formData.city,
+          country_code: formData.country,
+          postal_code: formData.zipCode,
+          province: formData.state,
+        },
+        email: formData.email,
+      });
+      
+      console.log("Address updated successfully:", cart);
+      onComplete();
+    } catch (error) {
+      console.error("Error updating address:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update shipping address",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -148,4 +181,4 @@ export function CheckoutAddress({ onComplete, isLoading }: CheckoutAddressProps)
       </Button>
     </form>
   );
-}
+};
