@@ -35,7 +35,7 @@ export const FeaturedProducts = () => {
   return (
     <section className="py-24 bg-gradient-to-b from-white to-primary/10">
       <div className="container">
-        <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
+        <div className="text-center max-w-2xl mx-auto mb-16 space-y-4 animate-fadeIn">
           <span className="text-accent inline-block font-medium tracking-wider text-sm uppercase">
             Our Collection
           </span>
