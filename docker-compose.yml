@@ -40,15 +40,11 @@ services:
     command: >
       sh -c "
         if [ ! -f package.json ]; then
-          mkdir -p temp-store &&
-          cd temp-store &&
-          npx create-medusa-app@latest . --seed --db-url=postgres://medusa:medusa@postgres:5432/medusa &&
-          cd .. &&
-          cp -r temp-store/* . &&
-          cp -r temp-store/.* . 2>/dev/null || true &&
-          rm -rf temp-store
+          npx create-medusa-app@latest . --seed --db-url=postgres://medusa:medusa@postgres:5432/medusa --name=my-medusa-store --skip-db --skip-redis --skip-env &&
+          npm install &&
+          npm run build &&
+          npm run seed
         fi &&
-        npm install &&
         npm run dev"
     depends_on:
       - postgres
