@@ -1,7 +1,8 @@
 import { ProductCard } from "./ProductCard";
 import { useQuery } from "@tanstack/react-query";
-import { getProducts } from "@/lib/medusa";
+import { getProducts } from "@/lib/saleor";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { SaleorProduct } from "@/lib/saleor";
 
 export const FeaturedProducts = () => {
   const { data: products, isLoading, error } = useQuery({
@@ -40,14 +41,14 @@ export const FeaturedProducts = () => {
               </div>
             ))
           ) : (
-            products?.slice(0, 4).map((product) => (
+            products?.slice(0, 4).map((product: SaleorProduct) => (
               <ProductCard
                 key={product.id}
                 productId={product.id}
-                title={product.title}
-                price={product.variants[0]?.prices[0]?.amount || 0}
-                image={product.thumbnail || "/placeholder.svg"}
-                description={product.description || ""}
+                title={product.name}
+                price={product.pricing.priceRange.start.gross.amount}
+                image={product.thumbnail?.url || "/placeholder.svg"}
+                description={product.description}
               />
             ))
           )}
