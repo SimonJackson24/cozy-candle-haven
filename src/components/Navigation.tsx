@@ -36,13 +36,13 @@ export function Navigation() {
                         </Link>
                       </NavigationMenuLink>
                       <NavigationMenuLink asChild>
-                        <Link to="/collections/seasonal" className="block p-2 hover:bg-accent rounded-md">
-                          Seasonal Collection
+                        <Link to="/collections/candles" className="block p-2 hover:bg-accent rounded-md">
+                          Candles Collection
                         </Link>
                       </NavigationMenuLink>
                       <NavigationMenuLink asChild>
-                        <Link to="/collections/bestsellers" className="block p-2 hover:bg-accent rounded-md">
-                          Best Sellers
+                        <Link to="/collections/wax-melts" className="block p-2 hover:bg-accent rounded-md">
+                          Wax Melts
                         </Link>
                       </NavigationMenuLink>
                       <NavigationMenuLink asChild>

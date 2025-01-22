@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Flame, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const Hero = () => {
   return (
@@ -21,23 +22,27 @@ export const Hero = () => {
             Discover our collection of luxury handcrafted candles and wax melts, designed to create the perfect ambiance in your home.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <Button 
-              size="lg" 
-              className="bg-accent hover:bg-accent/90 text-accent-foreground gap-2 text-base group"
-              aria-label="Shop our collection"
-            >
-              <Flame className="w-5 h-5 transition-all group-hover:rotate-12" aria-hidden="true" />
-              Shop Collection
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="group gap-2 text-base hover:bg-accent/5"
-              aria-label="Learn more about our products"
-            >
-              Learn More
-              <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" aria-hidden="true" />
-            </Button>
+            <Link to="/products">
+              <Button 
+                size="lg" 
+                className="bg-accent hover:bg-accent/90 text-accent-foreground gap-2 text-base group w-full sm:w-auto"
+                aria-label="Shop our collection"
+              >
+                <Flame className="w-5 h-5 transition-all group-hover:rotate-12" aria-hidden="true" />
+                Shop Collection
+              </Button>
+            </Link>
+            <Link to="/about">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="group gap-2 text-base hover:bg-accent/5 w-full sm:w-auto"
+                aria-label="Learn more about our products"
+              >
+                Learn More
+                <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
