@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - VITE_VENDURE_API_URL=http://vendure:3000/shop-api
+    depends_on:
+      - vendure
+    networks:
+      - app-network
+
+  vendure:
+    image: ghcr.io/vendure-ecommerce/vendure:2.0.5
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=vendure
+      - DB_USERNAME=vendure
+      - DB_PASSWORD=vendure123
+      - SUPERADMIN_USERNAME=superadmin
+      - SUPERADMIN_PASSWORD=superadmin123
+      - COOKIE_SECRET=your-cookie-secret
+      - JWT_SECRET=your-jwt-secret
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+  postgres:
+    image: postgres:14-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=vendure
+      - POSTGRES_USER=vendure
+      - POSTGRES_PASSWORD=vendure123
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+volumes:
+  postgres-data:
+
+networks:
+  app-network:
+    driver: bridge
