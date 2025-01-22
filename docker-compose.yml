@@ -8,10 +8,10 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - VITE_VENDURE_API_URL=http://localhost:3000/shop-api
+      - VITE_VENDURE_API_URL=http://vendure:3000/shop-api
       - HOST=0.0.0.0
     networks:
-      - vendure-network
+      - app-network
     depends_on:
       - vendure
 
@@ -20,19 +20,21 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DB_HOST=vendure-db
+      - DB_HOST=postgres
       - DB_PORT=5432
       - DB_NAME=vendure
       - DB_USERNAME=vendure
       - DB_PASSWORD=vendure
       - SUPERADMIN_USERNAME=superadmin@vendure.io
       - SUPERADMIN_PASSWORD=superadmin
+      - COOKIE_SECRET=your-cookie-secret
+      - JWT_SECRET=your-jwt-secret
     networks:
-      - vendure-network
+      - app-network
     depends_on:
-      - vendure-db
+      - postgres
 
-  vendure-db:
+  postgres:
     image: postgres:13-alpine
     ports:
       - "5432:5432"
@@ -41,16 +43,14 @@ services:
       - POSTGRES_USER=vendure
       - POSTGRES_PASSWORD=vendure
     networks:
-      - vendure-network
+      - app-network
     volumes:
-      - vendure-db-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
 
 networks:
-  vendure-network:
+  app-network:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
 
 volumes:
-  vendure-db-data:
+  postgres-data:
+    driver: local
