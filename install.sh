@@ -28,44 +28,34 @@ if ! docker info &> /dev/null; then
     exit 1
 fi
 
-echo -e "${GREEN}Setting up Vendure server...${NC}"
+# Create project directory if it doesn't exist
+mkdir -p cozy-candle-haven
+cd cozy-candle-haven
 
-# Create a directory for Vendure
-mkdir -p vendure
-cd vendure
-
-# Download Vendure docker-compose file if it doesn't exist
+# Copy docker-compose.yml if it doesn't exist
 if [ ! -f docker-compose.yml ]; then
-    echo -e "${YELLOW}Downloading Vendure configuration...${NC}"
-    curl -o docker-compose.yml https://raw.githubusercontent.com/vendure-ecommerce/vendure/master/docker-compose.yml
+    echo -e "${YELLOW}Creating docker-compose configuration...${NC}"
+    curl -o docker-compose.yml https://raw.githubusercontent.com/your-repo/cozy-candle-haven/main/docker-compose.yml
 fi
 
-# Start Vendure containers
-echo -e "${GREEN}Starting Vendure containers...${NC}"
+# Start all containers
+echo -e "${GREEN}Starting containers...${NC}"
 docker-compose up -d
 
-# Wait for Vendure to be ready
-echo -e "${YELLOW}Waiting for Vendure to start...${NC}"
+# Wait for services to be ready
+echo -e "${YELLOW}Waiting for services to start...${NC}"
 until $(curl --output /dev/null --silent --head --fail http://localhost:3000/shop-api); do
     printf '.'
     sleep 5
 done
-
-cd ..
-
-echo -e "${GREEN}Building and starting frontend containers...${NC}"
-
-# Build and start frontend containers
-docker-compose build
-docker-compose up -d
 
 echo -e "${GREEN}Installation successful!${NC}"
 echo -e "${GREEN}You can access the applications at:${NC}"
 echo -e "${GREEN}Frontend: http://localhost:8080${NC}"
 echo -e "${GREEN}Vendure Admin: http://localhost:3000/admin${NC}"
 echo -e "${GREEN}Default admin credentials:${NC}"
-echo -e "${YELLOW}Email: superadmin@vendure.io${NC}"
-echo -e "${YELLOW}Password: superadmin${NC}"
+echo -e "${YELLOW}Username: superadmin${NC}"
+echo -e "${YELLOW}Password: superadmin123${NC}"
 
 echo -e "\n${YELLOW}Important notes:${NC}"
 echo "1. The Vendure server may take a few minutes to fully initialize"
