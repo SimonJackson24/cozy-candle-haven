@@ -3,7 +3,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { medusa } from "@/lib/medusa";
+import { cartService } from "@/lib/vendure-client";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "react-router-dom";
 import { CartItem } from "./cart/CartItem";
@@ -12,14 +12,19 @@ import { CartOptions } from "./cart/CartOptions";
 
 interface CartItem {
   id: string;
-  title: string;
-  variant: {
+  productVariant: {
     id: string;
-    title: string;
+    name: string;
+    price: number;
+    priceWithTax: number;
+    product?: {
+      name: string;
+      featuredAsset?: {
+        preview: string;
+      };
+    };
   };
   quantity: number;
-  unit_price: number;
-  thumbnail: string;
 }
 
 export function Cart() {
@@ -44,9 +49,9 @@ export function Cart() {
     try {
       setIsLoading(true);
       console.log("Fetching cart with ID:", id);
-      const { cart } = await medusa.carts.retrieve(id);
+      const { cart } = await cartService.retrieve(id);
       console.log("Cart data retrieved:", cart);
-      setCartItems(cart.items);
+      setCartItems(cart.lines);
     } catch (error) {
       console.error("Error fetching cart:", error);
       toast({
@@ -65,11 +70,9 @@ export function Cart() {
     try {
       setIsLoading(true);
       console.log("Updating item quantity:", { itemId, quantity });
-      const { cart } = await medusa.carts.lineItems.update(cartId, itemId, {
-        quantity,
-      });
+      const { cart } = await cartService.updateItem(cartId, itemId, quantity);
       console.log("Cart updated:", cart);
-      setCartItems(cart.items);
+      setCartItems(cart.lines);
       toast({
         title: "Cart Updated",
         description: "Item quantity has been updated",
@@ -92,9 +95,9 @@ export function Cart() {
     try {
       setIsLoading(true);
       console.log("Removing item from cart:", itemId);
-      const { cart } = await medusa.carts.lineItems.delete(cartId, itemId);
+      const { cart } = await cartService.removeItem(cartId, itemId);
       console.log("Item removed, updated cart:", cart);
-      setCartItems(cart.items);
+      setCartItems(cart.lines);
       toast({
         title: "Item Removed",
         description: "Item has been removed from your cart",
@@ -123,14 +126,6 @@ export function Cart() {
 
     try {
       setIsLoading(true);
-      
-      await medusa.carts.update(cartId, {
-        context: {
-          order_notes: orderNotes,
-          is_gift: isGift
-        }
-      });
-
       navigate("/checkout");
       setIsOpen(false);
     } catch (error) {
@@ -146,7 +141,7 @@ export function Cart() {
   };
 
   const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.unit_price * item.quantity,
+    (sum, item) => sum + item.productVariant.priceWithTax * item.quantity,
     0
   );
 
@@ -184,7 +179,15 @@ export function Cart() {
                 {cartItems.map((item) => (
                   <CartItem
                     key={item.id}
-                    {...item}
+                    id={item.id}
+                    title={item.productVariant.product?.name || item.productVariant.name}
+                    variant={{
+                      id: item.productVariant.id,
+                      title: item.productVariant.name
+                    }}
+                    quantity={item.quantity}
+                    unit_price={item.productVariant.priceWithTax}
+                    thumbnail={item.productVariant.product?.featuredAsset?.preview || ""}
                     onUpdateQuantity={updateItemQuantity}
                     onRemove={removeItem}
                     isLoading={isLoading}

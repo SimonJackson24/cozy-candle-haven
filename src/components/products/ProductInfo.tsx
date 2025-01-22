@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { medusa } from "@/lib/medusa";
+import { cartService } from "@/lib/vendure-client";
 import { ProductVariantSelector } from "./ProductVariantSelector";
 import { QuantitySelector } from "./QuantitySelector";
 
@@ -30,15 +30,12 @@ export const ProductInfo = ({ product }: ProductInfoProps) => {
       let cartId = localStorage.getItem("cartId");
 
       if (!cartId) {
-        const { cart } = await medusa.carts.create();
+        const { cart } = await cartService.create();
         cartId = cart.id;
         localStorage.setItem("cartId", cart.id);
       }
 
-      await medusa.carts.lineItems.create(cartId, {
-        variant_id: selectedVariant,
-        quantity,
-      });
+      await cartService.addItem(cartId, selectedVariant, quantity);
 
       toast({
         title: "Success",
@@ -58,7 +55,7 @@ export const ProductInfo = ({ product }: ProductInfoProps) => {
 
   return (
     <div>
-      <h1 className="text-3xl font-serif mb-4">{product.title}</h1>
+      <h1 className="text-3xl font-serif mb-4">{product.name}</h1>
       <p className="text-muted-foreground mb-6">{product.description}</p>
       <div className="space-y-6">
         <ProductVariantSelector
