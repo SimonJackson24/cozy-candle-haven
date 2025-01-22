@@ -20,12 +20,12 @@ services:
     working_dir: /usr/src/app
     command: >
       bash -c "npm init -y &&
-              npm install @vendure/core@latest @vendure/admin-ui-plugin@latest @vendure/asset-server-plugin@latest typescript ts-node &&
+              npm install @vendure/core@latest @vendure/admin-ui-plugin@latest @vendure/asset-server-plugin@latest typescript ts-node @types/node &&
               mkdir -p src/static/assets &&
-              echo '{\"type\":\"module\",\"dependencies\":{\"@vendure/core\":\"latest\",\"@vendure/admin-ui-plugin\":\"latest\",\"@vendure/asset-server-plugin\":\"latest\"},\"scripts\":{\"dev\":\"ts-node src/index.ts\",\"start\":\"node dist/index.js\",\"build\":\"tsc\"},\"devDependencies\":{\"typescript\":\"^5.0.0\",\"ts-node\":\"^10.9.0\"}}' > package.json &&
+              echo '{\"type\":\"commonjs\",\"dependencies\":{\"@vendure/core\":\"latest\",\"@vendure/admin-ui-plugin\":\"latest\",\"@vendure/asset-server-plugin\":\"latest\"},\"scripts\":{\"dev\":\"ts-node --transpile-only src/index.ts\",\"start\":\"node dist/index.js\",\"build\":\"tsc\"},\"devDependencies\":{\"typescript\":\"^5.0.0\",\"ts-node\":\"^10.9.0\",\"@types/node\":\"^20.0.0\"}}' > package.json &&
               echo 'import { bootstrap, DefaultJobQueuePlugin, DefaultSearchPlugin } from \"@vendure/core\"; import { AdminUiPlugin } from \"@vendure/admin-ui-plugin\"; import { AssetServerPlugin } from \"@vendure/asset-server-plugin\"; import { config } from \"./vendure-config\"; bootstrap({ ...config, plugins: [ DefaultJobQueuePlugin, DefaultSearchPlugin, AssetServerPlugin.init({ route: \"assets\", assetUploadDir: \"./static/assets\" }), AdminUiPlugin.init({ route: \"admin\", port: 3000 }) ] }).catch(err => { console.error(err); process.exit(1); });' > src/index.ts &&
               echo 'import { VendureConfig } from \"@vendure/core\"; import { defaultConfig } from \"@vendure/core\"; export const config: VendureConfig = { ...defaultConfig, apiOptions: { port: 3000, adminApiPath: \"admin-api\", shopApiPath: \"shop-api\", }, authOptions: { tokenMethod: [\"bearer\"], superadminCredentials: { identifier: process.env.SUPERADMIN_USERNAME || \"superadmin\", password: process.env.SUPERADMIN_PASSWORD || \"superadmin123\" } }, dbConnectionOptions: { type: \"postgres\", host: process.env.DB_HOST || \"postgres\", port: Number(process.env.DB_PORT) || 5432, username: process.env.DB_USERNAME || \"vendure\", password: process.env.DB_PASSWORD || \"vendure123\", database: process.env.DB_NAME || \"vendure\", synchronize: true } };' > src/vendure-config.ts &&
-              echo '{\"compilerOptions\":{\"target\":\"es2019\",\"module\":\"commonjs\",\"outDir\":\"./dist\",\"rootDir\":\"./src\",\"strict\":true,\"esModuleInterop\":true,\"skipLibCheck\":true,\"forceConsistentCasingInFileNames\":true}}' > tsconfig.json &&
+              echo '{\"compilerOptions\":{\"target\":\"es2019\",\"module\":\"commonjs\",\"moduleResolution\":\"node\",\"outDir\":\"./dist\",\"rootDir\":\"./src\",\"strict\":true,\"esModuleInterop\":true,\"skipLibCheck\":true,\"forceConsistentCasingInFileNames\":true}}' > tsconfig.json &&
               npm run dev"
     ports:
       - "3000:3000"
