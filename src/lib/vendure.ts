@@ -2,7 +2,7 @@ import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
 
 // Initialize Apollo Client for Vendure
 export const vendureClient = new ApolloClient({
-  uri: 'http://localhost:3000/shop-api', // Vendure's GraphQL shop API endpoint
+  uri: import.meta.env.VITE_VENDURE_API_URL || 'http://localhost:3000/shop-api', // Vendure's GraphQL shop API endpoint
   cache: new InMemoryCache(),
 });
 
@@ -69,6 +69,10 @@ export const getProducts = async () => {
                 name
                 price
                 priceWithTax
+                prices {
+                  amount
+                  currencyCode
+                }
               }
             }
           }
@@ -111,6 +115,10 @@ export const getCollections = async () => {
                   name
                   price
                   priceWithTax
+                  prices {
+                    amount
+                    currencyCode
+                  }
                 }
               }
             }
@@ -152,6 +160,10 @@ export const getCollection = async (slug: string) => {
                 name
                 price
                 priceWithTax
+                prices {
+                  amount
+                  currencyCode
+                }
               }
             }
           }
@@ -185,6 +197,10 @@ export const getProduct = async (id: string) => {
               name
               price
               priceWithTax
+              prices {
+                amount
+                currencyCode
+              }
             }
           }
         }
