@@ -8,27 +8,34 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - VITE_MEDUSA_API_URL=http://localhost:9000/store
+      - VITE_VENDURE_API_URL=http://localhost:3000/shop-api
     depends_on:
-      - medusa
+      - vendure
     restart: unless-stopped
     networks:
       - app-network
 
-  medusa:
-    image: ghcr.io/medusajs/medusa-demo:latest
+  vendure:
+    image: node:18
+    working_dir: /usr/src/app
+    command: >
+      bash -c "npm install @vendure/create@latest &&
+              npx @vendure/create@latest init &&
+              npm run start"
     ports:
-      - "9000:9000"
+      - "3000:3000"
     environment:
-      - DATABASE_URL=postgres://medusa:medusa123@postgres:5432/medusa
-      - REDIS_URL=redis://redis:6379
-      - JWT_SECRET=your-jwt-secret
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=vendure
+      - DB_USERNAME=vendure
+      - DB_PASSWORD=vendure123
+      - SUPERADMIN_USERNAME=superadmin
+      - SUPERADMIN_PASSWORD=superadmin123
       - COOKIE_SECRET=your-cookie-secret
-      - STORE_CORS=http://localhost:8080
-      - ADMIN_CORS=http://localhost:7000
+      - JWT_SECRET=your-jwt-secret
     depends_on:
       - postgres
-      - redis
     restart: unless-stopped
     networks:
       - app-network
@@ -38,28 +45,17 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_DB=medusa
-      - POSTGRES_USER=medusa
-      - POSTGRES_PASSWORD=medusa123
+      - POSTGRES_DB=vendure
+      - POSTGRES_USER=vendure
+      - POSTGRES_PASSWORD=vendure123
     volumes:
       - postgres-data:/var/lib/postgresql/data
     restart: unless-stopped
     networks:
       - app-network
 
-  redis:
-    image: redis:6-alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
-    restart: unless-stopped
-    networks:
-      - app-network
-
 volumes:
   postgres-data:
-  redis-data:
 
 networks:
   app-network:
