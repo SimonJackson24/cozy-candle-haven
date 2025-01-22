@@ -19,8 +19,9 @@ services:
     image: node:18
     working_dir: /usr/src/app
     command: >
-      bash -c "npm install @vendure/create@latest &&
-              npx @vendure/create@latest init &&
+      bash -c "npm init -y &&
+              npm install @vendure/core@latest @vendure/admin-ui-plugin@latest @vendure/asset-server-plugin@latest typescript ts-node &&
+              npx ts-node --transpile-only node_modules/@vendure/core/cli/vendure-cli.js init --directory=. --skip-database-init --no-interaction &&
               npm run start"
     ports:
       - "3000:3000"
