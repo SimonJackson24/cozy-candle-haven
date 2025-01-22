@@ -1,4 +1,4 @@
-import { ApolloClient, InMemoryCache } from '@apollo/client';
+import { ApolloClient, InMemoryCache, gql } from '@apollo/client';
 
 // Initialize Apollo Client for Saleor
 export const saleorClient = new ApolloClient({
@@ -40,7 +40,42 @@ export interface SaleorProduct {
 export const getProducts = async () => {
   console.log("Fetching products from Saleor...");
   const { data } = await saleorClient.query({
-    query: PRODUCTS_QUERY,
+    query: gql`
+      query Products {
+        products(first: 100, channel: "default-channel") {
+          edges {
+            node {
+              id
+              name
+              description
+              thumbnail {
+                url
+              }
+              pricing {
+                priceRange {
+                  start {
+                    gross {
+                      amount
+                    }
+                  }
+                }
+              }
+              variants {
+                id
+                name
+                pricing {
+                  price {
+                    gross {
+                      amount
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    `,
   });
   console.log("Products fetched:", data.products);
   return data.products.edges.map((edge: any) => edge.node);
@@ -50,19 +85,9 @@ export const getProducts = async () => {
 export const getProduct = async (id: string) => {
   console.log("Fetching product details for:", id);
   const { data } = await saleorClient.query({
-    query: PRODUCT_QUERY,
-    variables: { id },
-  });
-  console.log("Product details:", data.product);
-  return data.product;
-};
-
-// GraphQL Queries
-const PRODUCTS_QUERY = `
-  query Products {
-    products(first: 100, channel: "default-channel") {
-      edges {
-        node {
+    query: gql`
+      query Product($id: ID!) {
+        product(id: $id, channel: "default-channel") {
           id
           name
           description
@@ -91,39 +116,9 @@ const PRODUCTS_QUERY = `
           }
         }
       }
-    }
-  }
-`;
-
-const PRODUCT_QUERY = `
-  query Product($id: ID!) {
-    product(id: $id, channel: "default-channel") {
-      id
-      name
-      description
-      thumbnail {
-        url
-      }
-      pricing {
-        priceRange {
-          start {
-            gross {
-              amount
-            }
-          }
-        }
-      }
-      variants {
-        id
-        name
-        pricing {
-          price {
-            gross {
-              amount
-            }
-          }
-        }
-      }
-    }
-  }
-`;
+    `,
+    variables: { id },
+  });
+  console.log("Product details:", data.product);
+  return data.product;
+};
