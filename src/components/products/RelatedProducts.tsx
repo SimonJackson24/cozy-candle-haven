@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getProducts } from "@/lib/medusa";
+import { getProducts, type MedusaProduct } from "@/lib/medusa";
 import { ProductCard } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -10,7 +10,7 @@ interface RelatedProductsProps {
 }
 
 export const RelatedProducts = ({ currentProductId, collectionId, tags }: RelatedProductsProps) => {
-  const { data: products, isLoading } = useQuery({
+  const { data: products, isLoading } = useQuery<MedusaProduct[]>({
     queryKey: ["related-products", collectionId, tags],
     queryFn: getProducts,
   });

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { getProducts } from "@/lib/medusa";
+import { getProducts, type MedusaProduct } from "@/lib/medusa";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
@@ -20,7 +20,7 @@ const Products = () => {
   const [category, setCategory] = useState("all");
   const itemsPerPage = 12;
 
-  const { data: products, isLoading, error } = useQuery({
+  const { data: products, isLoading, error } = useQuery<MedusaProduct[]>({
     queryKey: ["products", sortBy, searchQuery],
     queryFn: getProducts,
   });
