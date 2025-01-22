@@ -83,8 +83,7 @@ export function CheckoutShipping({ onComplete, onBack, isLoading }: CheckoutShip
       toast({
         title: "Error",
         description: "Failed to add shipping method",
-        variant: "destruct
-ive",
+        variant: "destructive",
       });
     }
   };
