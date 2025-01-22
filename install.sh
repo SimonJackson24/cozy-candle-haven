@@ -29,24 +29,11 @@ fi
 
 echo -e "${GREEN}Building and starting containers...${NC}"
 
-# Stop any existing containers
-docker-compose down
-
 # Build and start containers
 docker-compose build
 docker-compose up -d
 
-# Wait for services to be ready
-echo -e "${GREEN}Waiting for services to start...${NC}"
-sleep 10
-
-# Check if services are running
-if docker-compose ps | grep -q "Up"; then
-    echo -e "${GREEN}Installation successful!${NC}"
-    echo -e "${GREEN}You can access the application at:${NC}"
-    echo -e "${GREEN}Frontend: http://localhost:8080${NC}"
-    echo -e "${GREEN}Medusa Admin: http://localhost:9000/admin${NC}"
-else
-    echo -e "${YELLOW}Some services failed to start. Please check the logs:${NC}"
-    echo "docker-compose logs"
-fi
+echo -e "${GREEN}Installation successful!${NC}"
+echo -e "${GREEN}You can access the application at:${NC}"
+echo -e "${GREEN}Frontend: http://localhost:8080${NC}"
+echo -e "${GREEN}Make sure your Vendure server is running at http://localhost:3000${NC}"

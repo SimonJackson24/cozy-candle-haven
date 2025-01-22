@@ -1,57 +1,6 @@
 version: "3.8"
 
 services:
-  postgres:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_USER: medusa
-      POSTGRES_PASSWORD: medusa
-      POSTGRES_DB: medusa
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - medusa-network
-
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
-    networks:
-      - medusa-network
-
-  medusa:
-    image: node:20-alpine
-    working_dir: /app/medusa
-    volumes:
-      - ./medusa-data:/app/medusa
-    ports:
-      - "9000:9000"
-    environment:
-      DATABASE_URL: postgres://medusa:medusa@postgres:5432/medusa
-      REDIS_URL: redis://redis:6379
-      NODE_ENV: development
-      JWT_SECRET: your-super-secret-jwt-key
-      COOKIE_SECRET: your-super-secret-cookie-key
-      PORT: 9000
-      STORE_CORS: http://localhost:8080
-      ADMIN_CORS: http://localhost:9000
-    command: >
-      sh -c "
-        if [ ! -f package.json ]; then
-          npx @medusajs/medusa-cli new . --seed &&
-          npm install &&
-          npm run build &&
-          npm run seed
-        fi &&
-        npm run dev"
-    depends_on:
-      - postgres
-      - redis
-    networks:
-      - medusa-network
-
   frontend:
     build:
       context: .
@@ -59,18 +8,13 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - VITE_MEDUSA_BACKEND_URL=http://localhost:9000
+      - VITE_VENDURE_API_URL=http://localhost:3000/shop-api
       - HOST=0.0.0.0
-    depends_on:
-      - medusa
     networks:
-      - medusa-network
-
-volumes:
-  postgres_data:
+      - vendure-network
 
 networks:
-  medusa-network:
+  vendure-network:
     driver: bridge
     ipam:
       config:
