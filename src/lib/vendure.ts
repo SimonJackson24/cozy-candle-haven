@@ -11,6 +11,11 @@ export interface VendureProduct {
   id: string;
   name: string;
   description: string;
+  collections?: {
+    id: string;
+    name: string;
+    slug: string;
+  }[];
   featuredAsset?: {
     preview: string;
   };
@@ -19,7 +24,24 @@ export interface VendureProduct {
     name: string;
     price: number;
     priceWithTax: number;
+    prices: Array<{
+      amount: number;
+      currencyCode: string;
+    }>;
+    original_price: number;
+    calculated_price: number;
   }>;
+}
+
+export interface VendureCollection {
+  id: string;
+  name: string;
+  description: string;
+  slug: string;
+  featuredAsset?: {
+    preview: string;
+  };
+  products: VendureProduct[];
 }
 
 // Fetch products from Vendure
@@ -31,6 +53,94 @@ export const getProducts = async () => {
         query GetProducts {
           products(options: { take: 100 }) {
             items {
+              id
+              name
+              description
+              collections {
+                id
+                name
+                slug
+              }
+              featuredAsset {
+                preview
+              }
+              variants {
+                id
+                name
+                price
+                priceWithTax
+              }
+            }
+          }
+        }
+      `,
+    });
+    console.log("Products fetched:", data.products.items);
+    return data.products.items;
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    throw error;
+  }
+};
+
+// Get collections from Vendure
+export const getCollections = async () => {
+  console.log("Fetching collections...");
+  try {
+    const { data } = await vendureClient.query({
+      query: gql`
+        query GetCollections {
+          collections {
+            items {
+              id
+              name
+              description
+              slug
+              featuredAsset {
+                preview
+              }
+              products {
+                id
+                name
+                description
+                featuredAsset {
+                  preview
+                }
+                variants {
+                  id
+                  name
+                  price
+                  priceWithTax
+                }
+              }
+            }
+          }
+        }
+      `,
+    });
+    return data.collections.items;
+  } catch (error) {
+    console.error("Error fetching collections:", error);
+    throw error;
+  }
+};
+
+// Get single collection from Vendure
+export const getCollection = async (slug: string) => {
+  console.log("Fetching collection:", slug);
+  try {
+    const { data } = await vendureClient.query({
+      query: gql`
+        query GetCollection($slug: String!) {
+          collection(slug: $slug) {
+            id
+            name
+            description
+            slug
+            featuredAsset {
+              preview
+            }
+            products {
               id
               name
               description
@@ -47,38 +157,11 @@ export const getProducts = async () => {
           }
         }
       `,
+      variables: { slug },
     });
-    console.log("Products fetched:", data.products.items);
-    return data.products.items.map((product: VendureProduct) => ({
-      id: product.id,
-      name: product.name,
-      description: product.description,
-      thumbnail: {
-        url: product.featuredAsset?.preview || '/placeholder.svg'
-      },
-      pricing: {
-        priceRange: {
-          start: {
-            gross: {
-              amount: product.variants[0]?.priceWithTax || 0
-            }
-          }
-        }
-      },
-      variants: product.variants.map(variant => ({
-        id: variant.id,
-        name: variant.name,
-        pricing: {
-          price: {
-            gross: {
-              amount: variant.priceWithTax
-            }
-          }
-        }
-      }))
-    }));
+    return data.collection;
   } catch (error) {
-    console.error("Error fetching products:", error);
+    console.error("Error fetching collection:", error);
     throw error;
   }
 };
@@ -108,38 +191,7 @@ export const getProduct = async (id: string) => {
       `,
       variables: { id },
     });
-    
-    const product = data.product;
-    console.log("Product details:", product);
-    
-    return {
-      id: product.id,
-      name: product.name,
-      description: product.description,
-      thumbnail: {
-        url: product.featuredAsset?.preview || '/placeholder.svg'
-      },
-      pricing: {
-        priceRange: {
-          start: {
-            gross: {
-              amount: product.variants[0]?.priceWithTax || 0
-            }
-          }
-        }
-      },
-      variants: product.variants.map((variant: any) => ({
-        id: variant.id,
-        name: variant.name,
-        pricing: {
-          price: {
-            gross: {
-              amount: variant.priceWithTax
-            }
-          }
-        }
-      }))
-    };
+    return data.product;
   } catch (error) {
     console.error("Error fetching product details:", error);
     throw error;
