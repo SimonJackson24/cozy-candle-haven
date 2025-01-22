@@ -1,42 +1,38 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getProduct } from "@/lib/medusa";
-import { ProductGallery } from "@/components/products/ProductGallery";
+import { productService } from "@/lib/vendure-client";
 import { ProductInfo } from "@/components/products/ProductInfo";
+import { ProductGallery } from "@/components/products/ProductGallery";
 import { ProductReviews } from "@/components/products/ProductReviews";
 import { RelatedProducts } from "@/components/products/RelatedProducts";
-
-type Image = {
-  url: string;
-  id?: string;
-};
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ProductDetail() {
   const { id } = useParams();
 
   const { data: product, isLoading } = useQuery({
     queryKey: ["product", id],
-    queryFn: () => getProduct(id!),
+    queryFn: async () => {
+      if (!id) throw new Error("Product ID is required");
+      console.log("Fetching product details:", id);
+      const { product } = await productService.retrieve(id);
+      console.log("Product details retrieved:", product);
+      return product;
+    },
     enabled: !!id,
   });
-
-  console.log("Product data:", product);
-
-  const images: (Image | string)[] = product?.images || [];
-  if (product?.thumbnail) {
-    const thumbnailUrl = typeof product.thumbnail === 'string' 
-      ? product.thumbnail 
-      : (product.thumbnail as Image).url;
-    if (!images.some(img => (typeof img === 'string' ? img : (img as Image).url) === thumbnailUrl)) {
-      images.unshift(product.thumbnail);
-    }
-  }
 
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse">
-          <div className="h-96 bg-muted rounded-lg"></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <Skeleton className="aspect-square" />
+          <div className="space-y-4">
+            <Skeleton className="h-8 w-2/3" />
+            <Skeleton className="h-4 w-1/2" />
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-12 w-1/3" />
+          </div>
         </div>
       </div>
     );
@@ -45,43 +41,47 @@ export default function ProductDetail() {
   if (!product) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center">Product not found</div>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold">Product not found</h1>
+          <p className="text-muted-foreground">
+            The product you're looking for doesn't exist or has been removed.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="grid md:grid-cols-2 gap-8 mb-16">
-        <ProductGallery images={images} title={product.title} />
-        <ProductInfo product={product} />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+        <ProductGallery
+          images={[
+            product.featuredAsset?.preview || "/placeholder.svg",
+            // Add additional images here if available
+          ]}
+        />
+        <ProductInfo
+          product={{
+            id: product.id,
+            title: product.name,
+            description: product.description,
+            price: product.variants[0]?.priceWithTax || 0,
+            variants: product.variants.map((variant) => ({
+              id: variant.id,
+              title: variant.name,
+              price: variant.priceWithTax,
+              original_price: variant.price,
+              calculated_price: variant.priceWithTax,
+            })),
+          }}
+        />
       </div>
 
       <div className="space-y-16">
-        <ProductReviews 
-          productId={product.id} 
-          reviews={[
-            {
-              id: "1",
-              rating: 5,
-              comment: "Great product! Exactly as described.",
-              customer_name: "John D.",
-              created_at: "2024-02-20",
-            },
-            {
-              id: "2",
-              rating: 4,
-              comment: "Good quality, fast shipping.",
-              customer_name: "Sarah M.",
-              created_at: "2024-02-19",
-            },
-          ]} 
-        />
-
-        <RelatedProducts 
+        <ProductReviews productId={product.id} />
+        <RelatedProducts
           currentProductId={product.id}
-          collectionId={product.collection?.id}
-          tags={product.tags?.map(tag => tag.value)}
+          collectionId={product.collections?.[0]?.id}
         />
       </div>
     </div>

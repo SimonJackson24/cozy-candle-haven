@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { medusa } from "@/lib/medusa";
+import { customerService } from "@/lib/vendure-client";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 
@@ -19,9 +19,9 @@ export function AccountSettings() {
     queryKey: ["customer-profile"],
     queryFn: async () => {
       console.log("Fetching customer profile...");
-      const response = await medusa.customers.retrieve();
-      console.log("Customer profile fetched:", response.customer);
-      return response.customer;
+      const { customer } = await customerService.retrieve();
+      console.log("Customer profile fetched:", customer);
+      return customer;
     },
   });
 
@@ -39,7 +39,7 @@ export function AccountSettings() {
   const updateCustomerMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
       console.log("Updating customer profile:", data);
-      const response = await medusa.customers.update(data);
+      const response = await customerService.update(data);
       console.log("Customer profile updated:", response);
       return response;
     },

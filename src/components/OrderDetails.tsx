@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { medusa } from "@/lib/medusa";
+import { orderService } from "@/lib/vendure-client";
 import { formatDate } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
@@ -19,9 +19,9 @@ export function OrderDetails({ orderId }: OrderDetailsProps) {
     queryKey: ["order", orderId],
     queryFn: async () => {
       console.log("Fetching order details:", orderId);
-      const response = await medusa.orders.retrieve(orderId);
-      console.log("Order details retrieved:", response.order);
-      return response.order;
+      const { order } = await orderService.retrieve(orderId);
+      console.log("Order details retrieved:", order);
+      return order;
     },
   });
 

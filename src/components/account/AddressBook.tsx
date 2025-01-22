@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { medusa } from "@/lib/medusa";
+import { customerService } from "@/lib/vendure-client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AddressFormModal } from "./AddressFormModal";
 import { AddressCard } from "./address/AddressCard";
@@ -13,18 +13,16 @@ export function AddressBook() {
     queryKey: ["customer-addresses"],
     queryFn: async () => {
       console.log("Fetching customer addresses...");
-      const { customer } = await medusa.customers.retrieve();
-      console.log("Addresses fetched:", customer.shipping_addresses);
-      return customer.shipping_addresses;
+      const { customer } = await customerService.retrieve();
+      console.log("Addresses fetched:", customer.addresses);
+      return customer.addresses;
     },
   });
 
   const addAddressMutation = useMutation({
     mutationFn: async (address: any) => {
       console.log("Adding new address:", address);
-      const response = await medusa.customers.addresses.addAddress({
-        address: address,
-      });
+      const response = await customerService.createAddress(address);
       console.log("Address added:", response);
       return response;
     },
@@ -48,7 +46,7 @@ export function AddressBook() {
   const deleteAddressMutation = useMutation({
     mutationFn: async (addressId: string) => {
       console.log("Deleting address:", addressId);
-      const response = await medusa.customers.addresses.deleteAddress(addressId);
+      const response = await customerService.deleteAddress(addressId);
       console.log("Address deleted:", response);
       return response;
     },

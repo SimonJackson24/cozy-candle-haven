@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { medusa } from "@/lib/medusa";
+import { cartService } from "@/lib/vendure-client";
 import { CheckoutAddress } from "@/components/checkout/CheckoutAddress";
 import { CheckoutShipping } from "@/components/checkout/CheckoutShipping";
 import { CheckoutPayment } from "@/components/checkout/CheckoutPayment";
@@ -31,7 +31,7 @@ const Checkout = () => {
 
   const fetchCart = async (id: string) => {
     try {
-      const { cart } = await medusa.carts.retrieve(id);
+      const { cart } = await cartService.retrieve(id);
       setCartData(cart);
       console.log("Cart data in checkout:", cart);
     } catch (error) {
@@ -48,12 +48,19 @@ const Checkout = () => {
     try {
       setIsLoading(true);
       if (nextStep === "complete") {
+        if (!cartId) {
+          throw new Error("No cart ID found");
+        }
+        
         console.log("Processing order completion");
+        const { cart } = await cartService.complete(cartId);
+        
+        localStorage.removeItem("cartId");
         toast({
           title: "Order Completed",
           description: "Thank you for your purchase!",
         });
-        navigate("/order-confirmation");
+        navigate(`/order-confirmation?order_id=${cart.id}`);
         return;
       }
       setStep(nextStep);

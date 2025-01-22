@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
-import { medusa } from "@/lib/medusa";
+import { cartService } from "@/lib/vendure-client";
 
 interface CartItem {
   id: string;
@@ -24,8 +24,8 @@ export function CheckoutSummary() {
   const fetchCart = async (cartId: string) => {
     try {
       setIsLoading(true);
-      const { cart } = await medusa.carts.retrieve(cartId);
-      setCartItems(cart.items);
+      const { cart } = await cartService.retrieve(cartId);
+      setCartItems(cart.lines);
     } catch (error) {
       console.error("Error fetching cart:", error);
     } finally {

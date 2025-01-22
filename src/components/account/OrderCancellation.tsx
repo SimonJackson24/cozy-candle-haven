@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { medusa } from "@/lib/medusa";
+import { orderService } from "@/lib/vendure-client";
 import { useState } from "react";
 
 interface OrderCancellationProps {
@@ -16,7 +16,7 @@ export function OrderCancellation({ orderId, onCancelled }: OrderCancellationPro
     setIsLoading(true);
     try {
       console.log("Cancelling order:", orderId);
-      await medusa.admin.orders.cancel(orderId);
+      await orderService.cancel(orderId);
       console.log("Order cancelled successfully");
       
       toast({
