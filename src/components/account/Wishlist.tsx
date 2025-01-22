@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { medusa } from "@/lib/medusa";
+import { productService } from "@/lib/vendure-client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { X, Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -35,15 +35,15 @@ export function Wishlist() {
       try {
         const itemsWithDetails = await Promise.all(
           items.map(async (item: string) => {
-            const { product } = await medusa.products.retrieve(item);
+            const { product } = await productService.retrieve(item);
             return {
               id: product.id,
               product_id: product.id,
               created_at: new Date().toISOString(),
               product: {
                 id: product.id,
-                title: product.title,
-                thumbnail: product.thumbnail,
+                title: product.name,
+                thumbnail: product.featuredAsset?.preview || "/placeholder.svg",
                 handle: product.handle,
                 variants: product.variants,
               },

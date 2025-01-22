@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { medusa } from "@/lib/medusa";
+import { cartService } from "@/lib/vendure-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -78,14 +78,21 @@ export function CheckoutPayment({ onComplete, onBack, isLoading }: CheckoutPayme
         return;
       }
 
-      // Complete the cart
-      console.log("Completing cart...");
-      const response = await medusa.carts.complete(cartId);
-      console.log("Cart completion response:", response);
+      // Add payment to cart
+      console.log("Adding payment method to cart...");
+      const { cart } = await cartService.addPayment(cartId, {
+        method: "card",
+        metadata: {
+          cardNumber: data.cardNumber,
+          expiryDate: data.expiryDate,
+          nameOnCard: data.nameOnCard,
+        },
+      });
 
-      if (!response.type.includes('order')) {
-        throw new Error('Failed to complete order');
-      }
+      // Complete the order
+      console.log("Completing order...");
+      const order = await cartService.complete(cartId);
+      console.log("Order completed:", order);
 
       // Clear the cart ID from localStorage
       localStorage.removeItem("cartId");

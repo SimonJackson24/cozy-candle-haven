@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { medusa } from "@/lib/medusa";
+import { cartService } from "@/lib/vendure-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -63,17 +63,14 @@ export function CheckoutAddress({ onComplete, isLoading }: CheckoutAddressProps)
       }
 
       console.log("Updating cart with shipping address...");
-      const { cart } = await medusa.carts.update(cartId, {
-        shipping_address: {
-          first_name: data.firstName,
-          last_name: data.lastName,
-          address_1: data.address,
-          city: data.city,
-          country_code: data.country,
-          postal_code: data.zipCode,
-          province: data.state,
-        },
-        email: data.email,
+      const { cart } = await cartService.updateShippingAddress(cartId, {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        streetLine1: data.address,
+        city: data.city,
+        province: data.state,
+        postalCode: data.zipCode,
+        countryCode: data.country,
       });
       
       console.log("Address updated successfully:", cart);

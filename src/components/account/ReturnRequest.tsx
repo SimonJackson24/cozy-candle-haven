@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { medusa } from "@/lib/medusa";
+import { vendureClient } from "@/lib/vendure-client";
+import { gql } from "@apollo/client";
 
 interface ReturnRequestProps {
   orderId: string;
@@ -31,22 +32,29 @@ export function ReturnRequest({ orderId, items, onRequestSubmitted }: ReturnRequ
     setIsLoading(true);
     try {
       console.log("Submitting return request:", {
-        order_id: orderId,
-        items: selectedItems.map(id => ({
-          item_id: id,
-          quantity: 1, // You might want to make this dynamic
-        })),
+        orderId,
+        items: selectedItems,
         reason,
       });
       
-      await medusa.returns.create({
-        order_id: orderId,
-        items: selectedItems.map(id => ({
-          item_id: id,
-          quantity: 1,
-        })),
-        return_shipping: {
-          option_id: "manual",
+      await vendureClient.mutate({
+        mutation: gql`
+          mutation CreateReturn($input: CreateReturnInput!) {
+            createReturn(input: $input) {
+              id
+              state
+            }
+          }
+        `,
+        variables: {
+          input: {
+            orderId,
+            lines: selectedItems.map(id => ({
+              orderLineId: id,
+              quantity: 1,
+            })),
+            note: reason,
+          },
         },
       });
       

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { medusa } from "@/lib/medusa";
+import { shippingService, cartService } from "@/lib/vendure-client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -32,7 +32,7 @@ export function CheckoutShipping({ onComplete, onBack, isLoading }: CheckoutShip
 
         setLoadingOptions(true);
         console.log("Fetching shipping options...");
-        const { shipping_options } = await medusa.shippingOptions.list();
+        const { shipping_options } = await shippingService.getEligibleMethods(cartId);
         console.log("Available shipping options:", shipping_options);
         setShippingOptions(shipping_options);
         setError(null);
@@ -71,10 +71,7 @@ export function CheckoutShipping({ onComplete, onBack, isLoading }: CheckoutShip
       }
 
       console.log("Adding shipping method to cart...");
-      const { cart } = await medusa.carts.addShippingMethod(cartId, {
-        option_id: selectedMethod,
-      });
-      
+      const { cart } = await shippingService.setMethod(cartId, selectedMethod);
       console.log("Shipping method added successfully:", cart);
       toast({
         title: "Success",
@@ -86,7 +83,8 @@ export function CheckoutShipping({ onComplete, onBack, isLoading }: CheckoutShip
       toast({
         title: "Error",
         description: "Failed to add shipping method",
-        variant: "destructive",
+        variant: "destruct
+ive",
       });
     }
   };
@@ -145,11 +143,11 @@ export function CheckoutShipping({ onComplete, onBack, isLoading }: CheckoutShip
                 <div>
                   <div className="font-medium">{option.name}</div>
                   <div className="text-sm text-muted-foreground">
-                    {option.data?.description || "Standard shipping"}
+                    {option.description || "Standard shipping"}
                   </div>
                 </div>
                 <div className="font-medium">
-                  ${(option.amount / 100).toFixed(2)}
+                  ${(option.priceWithTax / 100).toFixed(2)}
                 </div>
               </Label>
             </div>

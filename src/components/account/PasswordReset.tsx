@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { medusa } from "@/lib/medusa";
+import { vendureClient } from "@/lib/vendure-client";
+import { gql } from "@apollo/client";
 
 export function PasswordReset() {
   const [email, setEmail] = useState("");
@@ -16,9 +17,16 @@ export function PasswordReset() {
     
     try {
       console.log("Requesting password reset for:", email);
-      await medusa.customers.generatePasswordToken({ email });
-      console.log("Password reset token generated successfully");
+      await vendureClient.mutate({
+        mutation: gql`
+          mutation RequestPasswordReset($email: String!) {
+            requestPasswordReset(emailAddress: $email)
+          }
+        `,
+        variables: { email },
+      });
       
+      console.log("Password reset token generated successfully");
       toast({
         title: "Reset link sent",
         description: "Check your email for password reset instructions",

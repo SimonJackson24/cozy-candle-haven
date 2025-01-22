@@ -151,6 +151,67 @@ export const cartService = {
       variables: { lineId },
     });
     return { cart: data.removeOrderLine };
+  },
+
+  async updateShippingAddress(cartId: string, address: any) {
+    const { data } = await vendureClient.mutate({
+      mutation: gql`
+        mutation UpdateShippingAddress($cartId: ID!, $input: CreateAddressInput!) {
+          setOrderShippingAddress(input: $input) {
+            ... on Order {
+              id
+              shippingAddress {
+                fullName
+                streetLine1
+                streetLine2
+                city
+                province
+                postalCode
+                country
+              }
+            }
+          }
+        }
+      `,
+      variables: { cartId, input: address },
+    });
+    return { cart: data.setOrderShippingAddress };
+  },
+
+  async addPayment(cartId: string, payment: any) {
+    const { data } = await vendureClient.mutate({
+      mutation: gql`
+        mutation AddPaymentToOrder($input: PaymentInput!) {
+          addPaymentToOrder(input: $input) {
+            ... on Order {
+              id
+              state
+              total
+            }
+          }
+        }
+      `,
+      variables: { input: payment },
+    });
+    return { cart: data.addPaymentToOrder };
+  },
+
+  async complete(cartId: string) {
+    const { data } = await vendureClient.mutate({
+      mutation: gql`
+        mutation TransitionOrderToState($state: String!) {
+          transitionOrderToState(state: $state) {
+            ... on Order {
+              id
+              state
+              total
+            }
+          }
+        }
+      `,
+      variables: { state: "ArrangingPayment" },
+    });
+    return data.transitionOrderToState;
   }
 };
 
@@ -419,6 +480,15 @@ export interface VendureProduct {
     name: string;
     price: number;
     priceWithTax: number;
+    prices: Array<{
+      amount: number;
+      currencyCode: string;
+    }>;
+  }>;
+  collections?: Array<{
+    id: string;
+    name: string;
+    slug: string;
   }>;
 }
 

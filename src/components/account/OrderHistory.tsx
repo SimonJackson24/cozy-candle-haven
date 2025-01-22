@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/utils";
-import { medusa } from "@/lib/medusa";
+import { customerService } from "@/lib/vendure-client";
 import { Button } from "@/components/ui/button";
 
 interface OrderHistoryProps {
@@ -17,9 +17,9 @@ export function OrderHistory({ orders: initialOrders, isLoading: initialLoading 
     queryKey: ["customer-orders"],
     queryFn: async () => {
       console.log("Fetching customer orders...");
-      const response = await medusa.customers.listOrders();
-      console.log("Orders fetched:", response.orders);
-      return response.orders;
+      const { customer } = await customerService.retrieve();
+      console.log("Orders fetched:", customer.orders);
+      return customer.orders;
     },
     initialData: initialOrders,
   });
@@ -51,21 +51,21 @@ export function OrderHistory({ orders: initialOrders, isLoading: initialLoading 
         >
           <div className="flex justify-between items-start mb-2">
             <div>
-              <p className="font-medium">Order #{order.display_id}</p>
+              <p className="font-medium">Order #{order.code}</p>
               <p className="text-sm text-muted-foreground">
-                Placed on {formatDate(order.created_at)}
+                Placed on {formatDate(order.createdAt)}
               </p>
             </div>
             <div className="text-right">
               <p className="font-medium">${(order.total / 100).toFixed(2)}</p>
               <p className="text-sm text-muted-foreground capitalize">
-                {order.status}
+                {order.state}
               </p>
             </div>
           </div>
           <div className="mt-4 flex justify-between items-center">
             <p className="text-sm text-muted-foreground">
-              {order.items?.length || 0} items
+              {order.lines?.length || 0} items
             </p>
             <Button 
               variant="outline" 
