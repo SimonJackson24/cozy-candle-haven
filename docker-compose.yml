@@ -12,6 +12,38 @@ services:
       - HOST=0.0.0.0
     networks:
       - vendure-network
+    depends_on:
+      - vendure
+
+  vendure:
+    image: ghcr.io/vendure-ecommerce/vendure:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_HOST=vendure-db
+      - DB_PORT=5432
+      - DB_NAME=vendure
+      - DB_USERNAME=vendure
+      - DB_PASSWORD=vendure
+      - SUPERADMIN_USERNAME=superadmin@vendure.io
+      - SUPERADMIN_PASSWORD=superadmin
+    networks:
+      - vendure-network
+    depends_on:
+      - vendure-db
+
+  vendure-db:
+    image: postgres:13-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=vendure
+      - POSTGRES_USER=vendure
+      - POSTGRES_PASSWORD=vendure
+    networks:
+      - vendure-network
+    volumes:
+      - vendure-db-data:/var/lib/postgresql/data
 
 networks:
   vendure-network:
@@ -19,3 +51,6 @@ networks:
     ipam:
       config:
         - subnet: 172.20.0.0/16
+
+volumes:
+  vendure-db-data:
