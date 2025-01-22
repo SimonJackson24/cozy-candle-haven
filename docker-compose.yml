@@ -27,7 +27,7 @@ services:
     volumes:
       - ./medusa-data:/app/medusa
     ports:
-      - "0.0.0.0:9000:9000"
+      - "9000:9000"
     environment:
       DATABASE_URL: postgres://medusa:medusa@postgres:5432/medusa
       REDIS_URL: redis://redis:6379
@@ -35,8 +35,8 @@ services:
       JWT_SECRET: your-super-secret-jwt-key
       COOKIE_SECRET: your-super-secret-cookie-key
       PORT: 9000
-      STORE_CORS: http://192.168.0.30:8080,http://localhost:8080
-      ADMIN_CORS: http://192.168.0.30:9000,http://localhost:9000
+      STORE_CORS: http://localhost:8080
+      ADMIN_CORS: http://localhost:9000
     command: >
       sh -c "
         if [ ! -f package.json ]; then
@@ -57,9 +57,9 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "0.0.0.0:8080:8080"
+      - "8080:8080"
     environment:
-      - VITE_MEDUSA_BACKEND_URL=http://192.168.0.30:9000
+      - VITE_MEDUSA_BACKEND_URL=http://localhost:9000
       - HOST=0.0.0.0
     depends_on:
       - medusa
