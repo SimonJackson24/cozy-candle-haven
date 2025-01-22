@@ -16,7 +16,7 @@ services:
       - app-network
 
   vendure:
-    image: vendure/vendure:2.0.5
+    image: ghcr.io/vendure-ecommerce/vendure-demo:latest
     ports:
       - "3000:3000"
     environment:
