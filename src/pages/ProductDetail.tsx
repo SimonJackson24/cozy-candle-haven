@@ -59,6 +59,7 @@ export default function ProductDetail() {
             product.featuredAsset?.preview || "/placeholder.svg",
             // Add additional images here if available
           ]}
+          title={product.name}
         />
         <ProductInfo
           product={{

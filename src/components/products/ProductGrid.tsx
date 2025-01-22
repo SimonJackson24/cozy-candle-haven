@@ -1,9 +1,9 @@
 import { ProductCard } from "@/components/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PricedProduct } from "@medusajs/medusa/dist/types/pricing";
+import { VendureProduct } from "@/lib/vendure";
 
 interface ProductGridProps {
-  products: PricedProduct[] | undefined;
+  products: VendureProduct[] | undefined;
   isLoading: boolean;
 }
 
@@ -37,11 +37,11 @@ export const ProductGrid = ({ products, isLoading }: ProductGridProps) => {
       {products.map((product) => (
         <ProductCard
           key={product.id}
-          title={product.title || ""}
-          price={product.variants?.[0]?.prices?.[0]?.amount || 0}
-          image={product.thumbnail || "/placeholder.svg"}
+          title={product.name}
+          price={product.variants?.[0]?.priceWithTax || 0}
+          image={product.featuredAsset?.preview || "/placeholder.svg"}
           description={product.description || ""}
-          productId={product.id || ""}
+          productId={product.id}
         />
       ))}
     </div>
