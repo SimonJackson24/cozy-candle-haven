@@ -1,12 +1,16 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getCollection } from "@/lib/medusa";
+import { getCollection } from "@/lib/vendure";
 import { ProductGrid } from "@/components/products/ProductGrid";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { ProductCollection } from "@medusajs/medusa";
-import type { PricedProduct } from "@medusajs/medusa/dist/types/pricing";
+import type { VendureProduct } from "@/lib/vendure";
 
-type CollectionWithProducts = ProductCollection & { products: PricedProduct[] };
+interface CollectionWithProducts {
+  id: string;
+  name: string;
+  description: string;
+  products: VendureProduct[];
+}
 
 export default function CollectionDetail() {
   const { handle } = useParams();
@@ -37,9 +41,9 @@ export default function CollectionDetail() {
           </div>
         ) : (
           <div className="mb-8">
-            <h1 className="text-4xl font-serif mb-4">{collection?.title || "Collection"}</h1>
+            <h1 className="text-4xl font-serif mb-4">{collection?.name || "Collection"}</h1>
             <p className="text-muted-foreground">
-              {(collection?.metadata?.description as string) || "Explore our collection"}
+              {collection?.description || "Explore our collection"}
             </p>
           </div>
         )}

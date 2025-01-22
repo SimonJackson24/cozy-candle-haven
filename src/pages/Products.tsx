@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { getProducts, type MedusaProduct } from "@/lib/medusa";
+import { getProducts, type VendureProduct } from "@/lib/vendure";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
@@ -20,7 +20,7 @@ const Products = () => {
   const [category, setCategory] = useState("all");
   const itemsPerPage = 12;
 
-  const { data: products, isLoading, error } = useQuery<MedusaProduct[]>({
+  const { data: products, isLoading, error } = useQuery<VendureProduct[]>({
     queryKey: ["products", sortBy, searchQuery],
     queryFn: getProducts,
   });
@@ -30,11 +30,11 @@ const Products = () => {
 
   const filteredProducts = products?.filter((product) => {
     const matchesSearch = searchQuery
-      ? product.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ? product.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         product.description?.toLowerCase().includes(searchQuery.toLowerCase())
       : true;
-    const matchesCategory = category === "all" || product.collection?.handle === category;
-    const price = product.variants?.[0]?.prices?.[0]?.amount || 0;
+    const matchesCategory = category === "all" || product.collections?.some(c => c.slug === category);
+    const price = product.variants?.[0]?.priceWithTax || 0;
     const matchesPrice = priceRange === "all" ||
       (priceRange === "under50" && price < 5000) ||
       (priceRange === "50to100" && price >= 5000 && price <= 10000) ||
