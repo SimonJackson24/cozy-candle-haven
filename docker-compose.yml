@@ -11,6 +11,7 @@ services:
       - VITE_VENDURE_API_URL=http://localhost:3000/shop-api
     depends_on:
       - vendure
+    restart: unless-stopped
     networks:
       - app-network
 
@@ -30,6 +31,7 @@ services:
       - JWT_SECRET=your-jwt-secret
     depends_on:
       - postgres
+    restart: unless-stopped
     networks:
       - app-network
 
@@ -43,6 +45,7 @@ services:
       - POSTGRES_PASSWORD=vendure123
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
     networks:
       - app-network
 

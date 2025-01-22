@@ -56,3 +56,41 @@ docker-compose up -d
 # Restart application
 docker-compose restart
 ```
+
+## Troubleshooting
+
+1. If services fail to start:
+   ```bash
+   # Check logs
+   docker-compose logs
+   ```
+
+2. If ports are already in use:
+   ```bash
+   # Find process using port
+   sudo lsof -i :PORT_NUMBER
+   ```
+
+3. If containers keep restarting:
+   ```bash
+   # Check container status
+   docker ps -a
+   ```
+
+4. Memory issues:
+   ```bash
+   # Check memory usage
+   free -h
+   ```
+
+## Backup & Restore
+
+To backup the database:
+```bash
+docker-compose exec postgres pg_dump -U vendure vendure > backup.sql
+```
+
+To restore from backup:
+```bash
+cat backup.sql | docker-compose exec -T postgres psql -U vendure vendure
+```
