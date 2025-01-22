@@ -40,10 +40,13 @@ services:
     command: >
       sh -c "
         if [ ! -f package.json ]; then
-          npx create-medusa-app@latest medusa-store --seed --db-url=postgres://medusa:medusa@postgres:5432/medusa &&
-          mv medusa-store/* . &&
-          mv medusa-store/.* . 2>/dev/null || true &&
-          rmdir medusa-store
+          mkdir -p temp-store &&
+          cd temp-store &&
+          npx create-medusa-app@latest . --seed --db-url=postgres://medusa:medusa@postgres:5432/medusa &&
+          cd .. &&
+          cp -r temp-store/* . &&
+          cp -r temp-store/.* . 2>/dev/null || true &&
+          rm -rf temp-store
         fi &&
         npm install &&
         npm run dev"
