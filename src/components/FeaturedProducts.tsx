@@ -1,8 +1,8 @@
 import { ProductCard } from "./ProductCard";
 import { useQuery } from "@tanstack/react-query";
-import { getProducts } from "@/lib/saleor";
+import { getProducts } from "@/lib/vendure";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { SaleorProduct } from "@/lib/saleor";
+import type { VendureProduct } from "@/lib/vendure";
 
 export const FeaturedProducts = () => {
   const { data: products, isLoading, error } = useQuery({
@@ -41,7 +41,7 @@ export const FeaturedProducts = () => {
               </div>
             ))
           ) : (
-            products?.slice(0, 4).map((product: SaleorProduct) => (
+            products?.slice(0, 4).map((product: any) => (
               <ProductCard
                 key={product.id}
                 productId={product.id}
